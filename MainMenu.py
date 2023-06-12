@@ -13,7 +13,7 @@ def how_to_play():
     print("How to play...")
     
 def create_rounded_button(master, text, command, relx, rely):
-    button_img = Image.open("asset/buttonPurple2.png")  # Replace "buttonPurple2.png" with your button background image
+    button_img = Image.open("assets/buttonPurple2.png")  # Replace "buttonPurple2.png" with your button background image
     button_img = button_img.resize((240, 100), Image.ANTIALIAS)  # Resize the image as per your requirements
 
     button_photo = ImageTk.PhotoImage(button_img)  # Convert the PIL Image to a PhotoImage
@@ -67,9 +67,10 @@ def create_rounded_button(master, text, command, relx, rely):
 # Create the main window
 window = tk.Tk()
 window.title("SUKOLILO WEREWOLF")
+window.state("zoomed") # maximize window
 
 # Load the background image
-original_image = Image.open("asset/mainMenuBackground.jpg")
+original_image = Image.open("assets/mainMenuBackground.jpg")
 background_image = ImageTk.PhotoImage(original_image)
 
 # Create a canvas
