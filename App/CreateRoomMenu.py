@@ -21,7 +21,7 @@ class CreateRoomMenu(tk.Frame):
         player_label.pack()
         self.player_var = tk.StringVar(self)
         self.player_var.set("4")
-        player_dropdown = ttk.OptionMenu(self, self.player_var, "4", "8", "12")
+        player_dropdown = ttk.OptionMenu(self, self.player_var, self.player_var.get(), "4", "8", "12")
         player_dropdown.pack()
 
         create_button = ttk.Button(self, text="Create Room", command=self.create_room)
