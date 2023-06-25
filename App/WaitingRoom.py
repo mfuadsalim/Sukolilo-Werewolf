@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import pickle
+import random
 
 class WaitingRoom(tk.Frame):
     def __init__(self, master, menu_manager):
@@ -50,5 +51,27 @@ class WaitingRoom(tk.Frame):
         start_button.pack()
 
     def start_game(self):
-        # Perform start game logic here
-        pass
+        data = self.menu_manager.socket.recv(2048)
+        data = pickle.loads(data)
+
+        num_players = int(data['num_players'])
+        if num_players == 4:
+            avatars = ['Werewolf', 'Seeker/Sheer', 'Villager', 'Villager']
+        elif num_players == 8:
+            avatars = ['Werewolf', 'Werewolf', 'Seeker', 'Seeker', 'Villager', 'Villager', 'Villager', 'Villager']
+        elif num_players == 12:
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Seeker/Sheer', 'Seeker/Sheer', 'Seeker/Sheer', 'Villager', 'Villager', 'Villager', 'Villager', 'Villager', 'Villager']
+        else:
+            print("Invalid number of players.")
+            return
+
+        random.shuffle(avatars)
+
+        # Perform start game logic with avatars here
+        for i, player in enumerate(data['player_list']):
+            avatar = avatars[i]
+            print(f"Player: {player}, Avatar: {avatar}")
+
+        # Example: You can update the player list labels with avatars instead of names
+        player_string = '\n'.join(avatars)
+        self.player_list_value.configure(text=player_string)

@@ -4,6 +4,7 @@ import socket
 
 # Import Class
 from App.MainMenu import MainMenu
+from App.MainInit import MainInit
 from App.CreateRoomMenu import CreateRoomMenu
 from App.JoinRoomMenu import JoinRoomMenu
 from App.HowToPlayMenu import HowToPlayMenu
@@ -35,7 +36,8 @@ class Main(tk.Tk):
             pass
 
     def create_menu_instances(self):
-        self.menus["main"] = MainMenu(self, self)
+        self.menus["main"] = MainInit(self, self)
+        self.menus["play"] = MainMenu(self, self)
         self.menus["create"] = CreateRoomMenu(self, self)
         self.menus["join"] = JoinRoomMenu(self, self)
         self.menus["how_to_play"] = HowToPlayMenu(self, self)
