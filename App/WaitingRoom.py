@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import pickle
 
+from App.GameRoom import GameRoom
+
 class WaitingRoom(tk.Frame):
     def __init__(self, master, menu_manager):
         super().__init__(master)
@@ -33,7 +35,7 @@ class WaitingRoom(tk.Frame):
         room_code_value = ttk.Label(self, text=self.menu_manager.room_id)
         room_code_value.pack()
         
-        num_player_label = ttk.Label(self, text="Num Player:")
+        num_player_label = ttk.Label(self, text="Number of Players:")
         num_player_label.pack()
 
         num_player_value = ttk.Label(self, text=data['num_players'])
@@ -50,5 +52,5 @@ class WaitingRoom(tk.Frame):
         start_button.pack()
 
     def start_game(self):
-        # Perform start game logic here
-        pass
+        self.menu_manager.menus["game_room"] = GameRoom(self.menu_manager, self.menu_manager)
+        self.menu_manager.show_menu("game_room")

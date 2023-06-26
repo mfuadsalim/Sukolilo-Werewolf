@@ -6,6 +6,7 @@ import pickle
 
 client_sockets = []
 rooms = {}
+players = {}
 
 class Server:
     def __init__(self):
@@ -58,10 +59,13 @@ class Client(threading.Thread):
 
     def run(self):
         running = 1
+        print(client_sockets)
+        print(f'address: {self.address}')
+
         while running:
             data = self.client.recv(self.size)
             data = pickle.loads(data)
-            
+ 
             if (data['command'] == "CREATE ROOM"):
                 room_id = data['room_id']
                 rooms[room_id] = {"num_players": [], "player_list": []}
@@ -95,7 +99,18 @@ class Client(threading.Thread):
                     send_data['status'] = 'DOES NOT EXIST'
 
                 self.client.send(pickle.dumps(send_data))
-                print(f'{data["name"]} CHECK ROOM with id: {room_id}, {send_data["status"]}')
+            
+            if (data['command'] == "CHECK ROOM ID"):
+                send_data = {
+                    'status' : ''
+                }
+
+                if data['room_id'] in rooms:
+                    send_data['status'] = 'ROOM ID EXIST'
+                else:
+                    send_data['status'] = 'ROOM ID DOES NOT EXIST'
+                
+                self.client.send(pickle.dumps(send_data))
 
 
 if __name__ == "__main__":

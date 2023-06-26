@@ -12,7 +12,7 @@ class CreateRoomMenu(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        name_label = ttk.Label(self, text="Name:")
+        name_label = ttk.Label(self, text="Choose Username:")
         name_label.pack()
         self.name_entry = ttk.Entry(self)
         self.name_entry.pack()
@@ -33,16 +33,30 @@ class CreateRoomMenu(tk.Frame):
     def create_room(self):
         name = self.name_entry.get()
         players = self.player_var.get()
-        # Code for creating a room goes here
-        # You can update the window or perform any other actions
         
         self.menu_manager.name = name
         print(f'Set player name to: {self.menu_manager.name}')
 
-        room_id = "".join(str(random.randint(0, 9)) for _ in range(6))
-        self.menu_manager.room_id = room_id
-        print(f'Set room id to: {self.menu_manager.room_id}')
+        room_id_check = True
+        while room_id_check:
+            room_id = "".join(str(random.randint(0, 9)) for _ in range(6))
+            self.menu_manager.room_id = room_id
+            print(f'Set room id to: {self.menu_manager.room_id}')
 
+            send_data = {
+                'command' : "CHECK ROOM ID",
+                'room_id' : room_id,
+                'name': name
+            }
+
+            self.menu_manager.socket.send(pickle.dumps(send_data))
+            print(f'Send data to server: {send_data}')
+
+            data = self.menu_manager.socket.recv(2048)
+            data = pickle.loads(data)
+
+            if data['status'] == 'ROOM ID DOES NOT EXIST':
+                room_id_check = False
 
         send_data = {
             'command' : "CREATE ROOM",

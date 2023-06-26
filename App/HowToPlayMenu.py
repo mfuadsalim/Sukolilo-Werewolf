@@ -10,6 +10,8 @@ class HowToPlayMenu(tk.Frame):
     def create_widgets(self):
         # Code for displaying the instructions for playing the game goes here
         # You can update the window or perform any other actions
+        num_player_label = ttk.Label(self, text="Players List:")
+        num_player_label.pack()
 
         back_button = ttk.Button(self, text="Back to Menu", command=self.menu_manager.show_main_menu)
         back_button.pack()
