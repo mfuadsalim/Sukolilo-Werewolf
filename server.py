@@ -3,10 +3,25 @@ import socket
 import sys
 import threading
 import pickle
+import random
 
 client_sockets = []
-rooms = {}
-players_socket = []
+rooms = {
+    '123456': {
+        'num_players': '4',
+        'player_list': [
+            {'name': 'Isol', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False},
+            {'name': 'Fuad', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False},
+            # {'name': 'Monica', 'role': '', 'status': 'alive',
+            #     'has_voted': False, 'has_acted': False},
+        ]
+    }
+}
+players_socket = {
+    '123456': []
+}
 
 
 class Server:
@@ -79,9 +94,13 @@ class Client(threading.Thread):
             if data['command'] == "CHECK ROOM":
                 self.check_room(data)
 
+            if data['command'] == "GENERATE AVATAR":
+                self.generate_avatar(data)
+
     def create_room(self, data, client):
         room_id = data['room_id']
         rooms[room_id] = {"num_players": None, "player_list": []}
+        players_socket[room_id] = []
         rooms[room_id]["num_players"] = data['num_players']
         print(
             f'>> {data["name"]} CREATE ROOM room_id={room_id} num players={data["num_players"]}')
@@ -90,7 +109,11 @@ class Client(threading.Thread):
 
     def get_detail_room(self, data):
         room_id = data["room_id"]
-        self.client.send(pickle.dumps(rooms[room_id]))
+        send_data = {
+            'command': 'GET DETAIL ROOM',
+            'game_info': rooms[room_id]
+        }
+        self.client.send(pickle.dumps(send_data))
 
     def join_room(self, data, client):
         room_id = data['room_id']
@@ -108,11 +131,11 @@ class Client(threading.Thread):
                 "name": data['name'],
                 "socket": client
             }
-            players_socket.append(player_socket)
+            players_socket[room_id].append(player_socket)
 
-            print(f'>>{data["name"]} JOIN ROOM with id: {room_id}')
-            print(f'>> server ROOM DETAILS={rooms}')
-            print(f'>> server SOCKET DETAILS={players_socket}')
+            print(f'>> {data["name"]} JOIN ROOM with id: {room_id}')
+            # print(f'>> server ROOM DETAILS={rooms}')
+            # print(f'>> server SOCKET DETAILS={players_socket}')
 
     def check_room(self, data):
         room_id = data['room_id']
@@ -127,6 +150,37 @@ class Client(threading.Thread):
 
         print(
             f'>> {data["name"]} CHECK ROOM room_id={room_id} -> status={send_data["status"]}')
+
+    def generate_avatar(self, data):
+        room_id = data["room_id"]
+        num_players = int(rooms[room_id]["num_players"])
+        if num_players == 4:
+            avatars = ['Werewolf', 'Seeker', 'Villager', 'Villager']
+        elif num_players == 8:
+            avatars = ['Werewolf', 'Werewolf', 'Seeker', 'Villager',
+                       'Villager', 'Villager', 'Villager', 'Villager']
+        elif num_players == 12:
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Seeker', 'Seeker',
+                       'Villager', 'Villager', 'Villager', 'Villager', 'Villager', 'Villager', 'Villager']
+
+        random.shuffle(avatars)
+
+        # Perform start game logic with avatars here
+        for i, player in enumerate(rooms[room_id]['player_list']):
+            avatar = avatars[i]
+            rooms[room_id]['player_list'][i]['role'] = avatar
+
+        send_data = {
+            'command': 'START GAME',
+            'game_info': rooms[room_id]
+        }
+        print(f'>> server GENERATING AVATAR')
+        self.broadcast(send_data, room_id)
+
+    def broadcast(self, send_data, room_id):
+        for player in players_socket[room_id]:
+            player_socket = player["socket"]
+            player_socket.send(pickle.dumps(send_data))
 
 
 if __name__ == "__main__":

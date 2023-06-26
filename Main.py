@@ -25,7 +25,7 @@ class Main(tk.Tk):
         self.connect_to_server()
         self.create_menu_instances()
         self.current_menu = None
-        self.show_main_menu()
+        self.show_main_init()
         self.configure_style()
 
     def connect_to_server(self):
@@ -55,6 +55,9 @@ class Main(tk.Tk):
         style.configure('TEntry', font=('Arial', 12))
 
     def show_main_menu(self):
+        self.show_menu("play")
+
+    def show_main_init(self):
         self.show_menu("main")
 
     def show_menu(self, menu_name):

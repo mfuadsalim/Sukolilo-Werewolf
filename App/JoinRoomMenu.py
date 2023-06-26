@@ -117,31 +117,17 @@ class JoinRoomMenu(tk.Frame):
     def join_room(self):
         name = self.name_entry.get()
         room_code = self.code_entry.get()
-        # Code for joining a room goes here
-        # You can update the window or perform any other actions
-        self.menu_manager.name = name
-        print(f'>> Set player name to: {self.menu_manager.name}')
-
-        self.menu_manager.room_id = room_code
-        print(f'>> Set room id to: {self.menu_manager.room_id}')
-
-        send_data = {
-            'command': "CHECK ROOM",
-            'room_id': room_code,
-            'name': name,
-        }
-
-        self.menu_manager.socket.send(pickle.dumps(send_data))
-        print(f'>> Send data to server: {send_data}')
-
-        data = self.menu_manager.socket.recv(2048)
-        data = pickle.loads(data)
-
-        if data['status'] == 'DOES NOT EXIST':
-            messagebox.showerror("Error", "Room does not exist.")
+        if name == "":
+            messagebox.showerror("Error", "Masukkan nama terlebih dahulu")
         else:
+            self.menu_manager.name = name
+            print(f'>> Set player name to: {self.menu_manager.name}')
+
+            self.menu_manager.room_id = room_code
+            print(f'>> Set room id to: {self.menu_manager.room_id}')
+
             send_data = {
-                'command': "JOIN ROOM",
+                'command': "CHECK ROOM",
                 'room_id': room_code,
                 'name': name,
             }
@@ -149,6 +135,21 @@ class JoinRoomMenu(tk.Frame):
             self.menu_manager.socket.send(pickle.dumps(send_data))
             print(f'>> Send data to server: {send_data}')
 
-            self.menu_manager.menus["waiting_room"] = WaitingRoom(
-                self.menu_manager, self.menu_manager)
-            self.menu_manager.show_menu("waiting_room")
+            data = self.menu_manager.socket.recv(2048)
+            data = pickle.loads(data)
+
+            if data['status'] == 'DOES NOT EXIST':
+                messagebox.showerror("Error", "Ruangan tidak ditemukan")
+            else:
+                send_data = {
+                    'command': "JOIN ROOM",
+                    'room_id': room_code,
+                    'name': name,
+                }
+
+                self.menu_manager.socket.send(pickle.dumps(send_data))
+                print(f'>> Send data to server: {send_data}')
+
+                self.menu_manager.menus["waiting_room"] = WaitingRoom(
+                    self.menu_manager, self.menu_manager)
+                self.menu_manager.show_menu("waiting_room")

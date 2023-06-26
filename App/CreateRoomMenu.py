@@ -4,9 +4,9 @@ import pickle
 import random
 from PIL import Image, ImageTk
 import ctypes
-from App.WaitingRoom import WaitingRoom
+import tkinter.messagebox as messagebox
 
-# class yang tidak berguna :"
+from App.WaitingRoom import WaitingRoom
 
 
 class CustomEntry(tk.Frame):
@@ -167,26 +167,27 @@ class CreateRoomMenu(tk.Frame):
     def create_room(self):
         name = self.name_entry.get()
         players = self.player_var.get()
-        # Code for creating a room goes here
-        # You can update the window or perform any other actions
 
-        self.menu_manager.name = name
-        print(f'>> Set player name to: {self.menu_manager.name}')
+        if name == "":
+            messagebox.showerror("Error", "Masukkan nama terlebih dahulu")
+        else:
+            self.menu_manager.name = name
+            print(f'>> Set player name to: {self.menu_manager.name}')
 
-        room_id = "".join(str(random.randint(0, 9)) for _ in range(6))
-        self.menu_manager.room_id = room_id
-        print(f'>> Set room id to: {self.menu_manager.room_id}')
+            room_id = "".join(str(random.randint(0, 9)) for _ in range(6))
+            self.menu_manager.room_id = room_id
+            print(f'>> Set room id to: {self.menu_manager.room_id}')
 
-        send_data = {
-            'command': "CREATE ROOM",
-            'room_id': room_id,
-            'name': name,
-            'num_players': players
-        }
+            send_data = {
+                'command': "CREATE ROOM",
+                'room_id': room_id,
+                'name': name,
+                'num_players': players
+            }
 
-        self.menu_manager.socket.send(pickle.dumps(send_data))
-        print(f'>> Send data to server: {send_data}')
+            self.menu_manager.socket.send(pickle.dumps(send_data))
+            print(f'>> Send data to server: {send_data}')
 
-        self.menu_manager.menus["waiting_room"] = WaitingRoom(
-            self.menu_manager, self.menu_manager)
-        self.menu_manager.show_menu("waiting_room")
+            self.menu_manager.menus["waiting_room"] = WaitingRoom(
+                self.menu_manager, self.menu_manager)
+            self.menu_manager.show_menu("waiting_room")

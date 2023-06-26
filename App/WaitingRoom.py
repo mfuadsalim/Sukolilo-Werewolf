@@ -3,6 +3,9 @@ from tkinter import ttk
 import pickle
 import random
 import threading
+import tkinter.messagebox as messagebox
+
+from App.WelcomeGame import WelcomeGame
 
 
 class WaitingRoom(tk.Frame):
@@ -16,7 +19,7 @@ class WaitingRoom(tk.Frame):
         self.create_widgets()
 
         # Start a separate thread to continuously update the player list
-        self.update_thread = threading.Thread(target=self.get_player_list)
+        self.update_thread = threading.Thread(target=self.update)
         # Set the thread as a daemon to stop it when the main thread exits
         self.update_thread.daemon = True
         self.update_thread.start()
@@ -40,10 +43,11 @@ class WaitingRoom(tk.Frame):
         self.player_list_value = ttk.Label(self, text="")
         self.player_list_value.pack()
 
-        start_button = ttk.Button(self, text="Start", command=self.start_game)
-        start_button.pack()
+        self.start_button = ttk.Button(
+            self, text="Start", command=self.start_game)
+        self.start_button.pack()
 
-    def get_player_list(self):
+    def update(self):
         while True:
             send_data = {
                 'command': "GET DETAIL ROOM",
@@ -53,18 +57,41 @@ class WaitingRoom(tk.Frame):
 
             self.menu_manager.socket.send(pickle.dumps(send_data))
 
-            data = self.menu_manager.socket.recv(2048)
-            data = pickle.loads(data)
+            try:
+                data = self.menu_manager.socket.recv(2048)
+                data = pickle.loads(data)
+                if data["command"] == "GET DETAIL ROOM":
+                    # Access the 'num_players' value
+                    num_players = data["game_info"]['num_players']
+                    # Access the 'player_list' value
+                    player_list = data["game_info"]['player_list']
+                    player_names = '\n'.join([player['name']
+                                              for player in player_list])
 
-            num_players = data['num_players']  # Access the 'num_players' value
-            player_list = data['player_list']  # Access the 'player_list' value
-            player_names = '\n'.join([player['name']
-                                     for player in player_list])
+                    self.num_player_value.config(text=num_players)
+                    self.player_list_value.config(text=player_names)
 
-            self.num_player_value.config(text=num_players)
-            self.player_list_value.config(text=player_names)
+                    if int(num_players) != len(player_list):
+                        self.start_button.state(['disabled'])
+                    else:
+                        self.start_button.state(['!disabled'])
 
-            self.menu_manager.game_info = data
+                    self.menu_manager.game_info = data["game_info"]
+
+                if data["command"] == "START GAME":
+                    self.menu_manager.game_info = data["game_info"]
+                    print(self.menu_manager.game_info)
+
+                    self.menu_manager.menus["welcome_game"] = WelcomeGame(
+                        self.menu_manager, self.menu_manager)
+                    self.menu_manager.show_menu("welcome_game")
+            except:
+                pass
 
     def start_game(self):
-        pass
+        send_data = {
+            'command': "GENERATE AVATAR",
+            'room_id': self.menu_manager.room_id,
+        }
+
+        self.menu_manager.socket.send(pickle.dumps(send_data))
