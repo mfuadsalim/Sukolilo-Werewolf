@@ -120,10 +120,10 @@ class JoinRoomMenu(tk.Frame):
         # Code for joining a room goes here
         # You can update the window or perform any other actions
         self.menu_manager.name = name
-        print(f'Set player name to: {self.menu_manager.name}')
+        print(f'>> Set player name to: {self.menu_manager.name}')
 
         self.menu_manager.room_id = room_code
-        print(f'Set room id to: {self.menu_manager.room_id}')
+        print(f'>> Set room id to: {self.menu_manager.room_id}')
 
         send_data = {
             'command': "CHECK ROOM",
@@ -132,7 +132,7 @@ class JoinRoomMenu(tk.Frame):
         }
 
         self.menu_manager.socket.send(pickle.dumps(send_data))
-        print(f'Send data to server: {send_data}')
+        print(f'>> Send data to server: {send_data}')
 
         data = self.menu_manager.socket.recv(2048)
         data = pickle.loads(data)
@@ -147,7 +147,7 @@ class JoinRoomMenu(tk.Frame):
             }
 
             self.menu_manager.socket.send(pickle.dumps(send_data))
-            print(f'Send data to server: {send_data}')
+            print(f'>> Send data to server: {send_data}')
 
             self.menu_manager.menus["waiting_room"] = WaitingRoom(
                 self.menu_manager, self.menu_manager)

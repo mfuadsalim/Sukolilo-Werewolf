@@ -15,10 +15,13 @@ class Main(tk.Tk):
         super().__init__()
         self.title("SUKOLILO WEREWOLF")
         self.state('zoomed')  # Maximize the window
+        self.server_host = 'localhost'
+        self.server_port = 5000
         self.menus = {}
         self.socket = None
         self.name = None
         self.room_id = None
+        self.game_info = None
         self.connect_to_server()
         self.create_menu_instances()
         self.current_menu = None
@@ -28,11 +31,12 @@ class Main(tk.Tk):
     def connect_to_server(self):
         try:
             # Update with the server address and port
-            server_address = ('localhost', 5000)
+            server_address = (self.server_host, self.server_port)
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(server_address)
             # Perform any other actions with the connected socket if needed
-            print("Connect to server")
+            print(
+                f"Welcome to Sukolilo Werewolf. Server running on {self.server_host} port {self.server_port}\n")
         except ConnectionError:
             # Handle connection error
             pass
