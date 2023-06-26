@@ -4,10 +4,12 @@ import socket
 
 # Import Class
 from App.MainMenu import MainMenu
+from App.MainInit import MainInit
 from App.CreateRoomMenu import CreateRoomMenu
 from App.JoinRoomMenu import JoinRoomMenu
 from App.HowToPlayMenu import HowToPlayMenu
 from App.GameRoom import GameRoom
+
 
 class Main(tk.Tk):
     def __init__(self):
@@ -26,7 +28,8 @@ class Main(tk.Tk):
 
     def connect_to_server(self):
         try:
-            server_address = ('localhost', 5000)  # Update with the server address and port
+            # Update with the server address and port
+            server_address = ('localhost', 5000)
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(server_address)
             # Perform any other actions with the connected socket if needed
@@ -36,11 +39,11 @@ class Main(tk.Tk):
             pass
 
     def create_menu_instances(self):
-        self.menus["main"] = MainMenu(self, self)
+        self.menus["main"] = MainInit(self, self)
+        self.menus["play"] = MainMenu(self, self)
         self.menus["create"] = CreateRoomMenu(self, self)
         self.menus["join"] = JoinRoomMenu(self, self)
         self.menus["how_to_play"] = HowToPlayMenu(self, self)
-        
 
     def configure_style(self):
         style = ttk.Style()
