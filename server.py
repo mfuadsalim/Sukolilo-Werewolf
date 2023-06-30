@@ -14,8 +14,8 @@ rooms = {
                 'has_voted': False, 'has_acted': False},
             {'name': 'Fuad', 'role': '', 'status': 'alive',
                 'has_voted': False, 'has_acted': False},
-            # {'name': 'Monica', 'role': '', 'status': 'alive',
-            #     'has_voted': False, 'has_acted': False},
+            {'name': 'Monica', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False},
         ]
     }
 }
@@ -33,7 +33,11 @@ class Server:
         self.server = None
         self.threads = []
         print(
-            f"The Sukolilo Werewolf server is starting on {self.host} port {self.port}\n")
+            "============================================================================")
+        print(
+            f"The Sukolilo Werewolf server is starting on {self.host} port {self.port}")
+        print(
+            "============================================================================\n")
 
     def open_socket(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -155,13 +159,13 @@ class Client(threading.Thread):
         room_id = data["room_id"]
         num_players = int(rooms[room_id]["num_players"])
         if num_players == 4:
-            avatars = ['Werewolf', 'Seeker', 'Villager', 'Villager']
+            avatars = ['Werewolf', 'Dokter', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 8:
-            avatars = ['Werewolf', 'Werewolf', 'Seeker', 'Villager',
-                       'Villager', 'Villager', 'Villager', 'Villager']
+            avatars = ['Werewolf', 'Werewolf', 'Dokter', 'Pemburu',
+                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 12:
-            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Seeker', 'Seeker',
-                       'Villager', 'Villager', 'Villager', 'Villager', 'Villager', 'Villager', 'Villager']
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Dokter', 'Dokter', 'Pemburu',
+                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
 
         random.shuffle(avatars)
 
