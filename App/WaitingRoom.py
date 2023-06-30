@@ -101,6 +101,16 @@ class WaitingRoom(tk.Frame):
                         if player["name"] == self.menu_manager.name:
                             self.menu_manager.role = player["role"]
 
+                    if self.menu_manager.role == "Werewolf":
+                        self.menu_manager.action = "Bunuh"
+                    elif self.menu_manager.role == "Dokter":
+                        self.menu_manager.action = "Menjaga"
+                    elif self.menu_manager.role == "Hunter":
+                        self.menu_manager.action = "Memeriksa Identitas Pemain"
+                    else:
+                        self.menu_manager.action = None
+
+
                     self.is_running = False
 
                     self.menu_manager.menus["welcome_game"] = WelcomeGame(

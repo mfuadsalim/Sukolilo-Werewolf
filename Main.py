@@ -30,6 +30,7 @@ class Main(tk.Tk):
         self.socket = None
         self.name = None
         self.role = None
+        self.action = None
         self.room_id = None
         self.game_info = None
         self.current_menu = None
