@@ -23,6 +23,7 @@ players_socket = {
     '123456': []
 }
 
+players_killed = []
 
 class Server:
     def __init__(self):
@@ -101,6 +102,9 @@ class Client(threading.Thread):
             if data['command'] == "GENERATE AVATAR":
                 self.generate_avatar(data)
 
+            if data['command'] == "ACTION":
+                self.action(data)
+
     def create_room(self, data, client):
         room_id = data['room_id']
         rooms[room_id] = {"num_players": None, "player_list": []}
@@ -159,12 +163,12 @@ class Client(threading.Thread):
         room_id = data["room_id"]
         num_players = int(rooms[room_id]["num_players"])
         if num_players == 4:
-            avatars = ['Werewolf', 'Dokter', 'Mahasiswa', 'Mahasiswa']
+            avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 8:
-            avatars = ['Werewolf', 'Werewolf', 'Dokter', 'Pemburu',
+            avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 12:
-            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Dokter', 'Dokter', 'Pemburu',
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Pemburu',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
 
         random.shuffle(avatars)
@@ -180,6 +184,26 @@ class Client(threading.Thread):
         }
         print(f'>> server GENERATING AVATAR')
         self.broadcast(send_data, room_id)
+
+    def action(self, data):
+        room_id = data["room_id"]
+        if data["role"] == "Werewolf" or data["role"]  == "Hunter":
+            if data["action_subject"] in players_killed:
+                pass
+            else:
+                players_killed.append(data["action_subject"])
+                for player in rooms[room_id]['player_list']:
+                    if player['name'] == data["action_subject"]:
+                        player['status'] = 'dead'
+                print(f">> {data['player_name']}({data['role']}) kill {data['action_subject']}")
+
+        elif data["role"]  == "Peneliti":
+            role = None
+            for player in rooms[room_id]['player_list']:
+                if player['name'] == data["action_subject"]:
+                    role = player['role']
+
+            print(f">> {data['player_name']}({data['role']}) seek for {data['action_subject']}'s role={role}")
 
     def broadcast(self, send_data, room_id):
         for player in players_socket[room_id]:

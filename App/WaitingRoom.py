@@ -67,7 +67,6 @@ class WaitingRoom(tk.Frame):
             try:
                 data = self.menu_manager.socket.recv(2048)
                 data = pickle.loads(data)
-                print(data)
                 if data["command"] == "GET DETAIL ROOM":
                     # Access the 'num_players' value
                     num_players = data["game_info"]['num_players']
@@ -103,10 +102,10 @@ class WaitingRoom(tk.Frame):
 
                     if self.menu_manager.role == "Werewolf":
                         self.menu_manager.action = "Bunuh"
-                    elif self.menu_manager.role == "Dokter":
-                        self.menu_manager.action = "Menjaga"
-                    elif self.menu_manager.role == "Hunter":
+                    elif self.menu_manager.role == "Peneliti":
                         self.menu_manager.action = "Memeriksa Identitas Pemain"
+                    elif self.menu_manager.role == "Hunter":
+                        self.menu_manager.action = "Bunuh"
                     else:
                         self.menu_manager.action = None
 
