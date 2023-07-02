@@ -82,29 +82,48 @@ class CreateRoomMenu(tk.Frame):
         name = self.name_entry.get()
         players = self.player_var.get()
 
+        
         if name == "":
             messagebox.showerror("Error", "Masukkan nama terlebih dahulu")
         else:
             self.menu_manager.name = name
             print(f'>> Set player name to: {self.menu_manager.name}')
 
+        room_id_check = True
+
+        while room_id_check:
             room_id = "".join(str(random.randint(0, 9)) for _ in range(6))
             self.menu_manager.room_id = room_id
             print(f'>> Set room id to: {self.menu_manager.room_id}')
 
             send_data = {
-                'command': "CREATE ROOM",
-                'room_id': room_id,
-                'name': name,
-                'num_players': players
+                'command' : "CHECK ROOM ID",
+                'room_id' : room_id,
+                'name': name
             }
 
             self.menu_manager.socket.send(pickle.dumps(send_data))
-            print(f'>> Send data to server: {send_data}')
+            print(f'Send data to server: {send_data}')
 
-            self.menu_manager.menus["waiting_room"] = WaitingRoom(
-                self.menu_manager, self.menu_manager)
-            self.menu_manager.show_menu("waiting_room")
+            data = self.menu_manager.socket.recv(2048)
+            data = pickle.loads(data)
+
+            if data['status'] == 'ROOM ID DOES NOT EXIST':
+                room_id_check = False
+
+        send_data = {
+            'command': "CREATE ROOM",
+            'room_id': room_id,
+            'name': name,
+            'num_players': players
+        }
+
+        self.menu_manager.socket.send(pickle.dumps(send_data))
+        print(f'>> Send data to server: {send_data}')
+
+        self.menu_manager.menus["waiting_room"] = WaitingRoom(
+            self.menu_manager, self.menu_manager)
+        self.menu_manager.show_menu("waiting_room")
 
     def on_entry_click(self, event):
         if self.name_entry.get() == self.placeholder_text:

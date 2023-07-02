@@ -83,6 +83,9 @@ class Client(threading.Thread):
 
     def run(self):
         running = 1
+        print(client_sockets)
+        print(f'address: {self.address}')
+
         while running:
             data = self.client.recv(self.size)
             data = pickle.loads(data)
@@ -98,6 +101,9 @@ class Client(threading.Thread):
 
             if data['command'] == "CHECK ROOM":
                 self.check_room(data)
+
+            if (data['command'] == "CHECK ROOM ID"):
+                self.check_room_id(data)
 
             if data['command'] == "GENERATE AVATAR":
                 self.generate_avatar(data)
@@ -159,6 +165,18 @@ class Client(threading.Thread):
         print(
             f'>> {data["name"]} CHECK ROOM room_id={room_id} -> status={send_data["status"]}')
 
+    def check_room_id(self, data):
+        send_data = {
+            'status' : ''
+        }
+
+        if data['room_id'] in rooms:
+            send_data['status'] = 'ROOM ID EXIST'
+        else:
+            send_data['status'] = 'ROOM ID DOES NOT EXIST'
+        
+        self.client.send(pickle.dumps(send_data))
+
     def generate_avatar(self, data):
         room_id = data["room_id"]
         num_players = int(rooms[room_id]["num_players"])
@@ -209,6 +227,7 @@ class Client(threading.Thread):
         for player in players_socket[room_id]:
             player_socket = player["socket"]
             player_socket.send(pickle.dumps(send_data))
+
 
 
 if __name__ == "__main__":
