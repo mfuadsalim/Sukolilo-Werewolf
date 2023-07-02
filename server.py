@@ -3,10 +3,27 @@ import socket
 import sys
 import threading
 import pickle
+import random
 
 client_sockets = []
-rooms = {}
-players = {}
+rooms = {
+    '123456': {
+        'num_players': '4',
+        'player_list': [
+            {'name': 'Isol', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False},
+            {'name': 'Fuad', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False},
+            {'name': 'Monica', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False},
+        ]
+    }
+}
+players_socket = {
+    '123456': []
+}
+
+players_killed = []
 
 class Server:
     def __init__(self):
@@ -16,12 +33,17 @@ class Server:
         self.size = 1024
         self.server = None
         self.threads = []
-        print("-- Server Start --")
+        print(
+            "============================================================================")
+        print(
+            f"The Sukolilo Werewolf server is starting on {self.host} port {self.port}")
+        print(
+            "============================================================================\n")
 
     def open_socket(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server.bind((self.host,self.port))
+        self.server.bind((self.host, self.port))
         self.server.listen(5)
 
     def run(self):
@@ -29,13 +51,14 @@ class Server:
         input = [self.server]
         running = 1
         while running:
-            inputready,outputready,exceptready = select.select(input,[],[])
+            inputready, outputready, exceptready = select.select(input, [], [])
 
             for s in inputready:
                 if s == self.server:
                     # handle the server socket
                     client_socket, client_address = self.server.accept()
-                    print(f"{client_address} connected to server")
+                    print(
+                        f">> New client connected to server: {client_address}")
                     client_sockets.append(client_socket)
                     c = Client(client_socket, client_address)
                     c.start()
@@ -45,10 +68,11 @@ class Server:
                     junk = sys.stdin.readline()
                     running = 0
 
-	 # close all threads
+         # close all threads
         self.server.close()
         for c in self.threads:
             c.join()
+
 
 class Client(threading.Thread):
     def __init__(self, client, address):
@@ -65,52 +89,145 @@ class Client(threading.Thread):
         while running:
             data = self.client.recv(self.size)
             data = pickle.loads(data)
- 
+
             if (data['command'] == "CREATE ROOM"):
-                room_id = data['room_id']
-                rooms[room_id] = {"num_players": [], "player_list": []}
-                rooms[room_id]["num_players"].append(data['players'])
-                rooms[room_id]["player_list"].append(data['name'])
-                print(f'{data["name"]} CREATE ROOM with room id: {room_id} and num players: {data["players"]}')
-                print(f'ROOM Detail: {rooms}')
+                self.create_room(data, self.client)
 
             if (data['command'] == "GET DETAIL ROOM"):
-                send_data = rooms[data['room_id']]
-                print(f'{data["name"]} GET DETAIL ROOM: {send_data}')
-                self.client.send(pickle.dumps(send_data))
+                self.get_detail_room(data)
 
             if (data['command'] == "JOIN ROOM"):
-                room_id = data['room_id']
-                if room_id in rooms:
-                    rooms[room_id]["player_list"].append(data['name'])
-                    print(f'{data["name"]} JOIN ROOM with id: {room_id}')
-                    print(f'ROOM Detail: {rooms}')
+                self. join_room(data, self.client)
 
             if data['command'] == "CHECK ROOM":
-                room_id = data['room_id']
-                
-                send_data = {
-                    'status' : ''
-                }
+                self.check_room(data)
 
-                if room_id in rooms:
-                    send_data['status'] = 'EXIST'
-                else:
-                    send_data['status'] = 'DOES NOT EXIST'
-
-                self.client.send(pickle.dumps(send_data))
-            
             if (data['command'] == "CHECK ROOM ID"):
-                send_data = {
-                    'status' : ''
-                }
+                self.check_room_id(data)
 
-                if data['room_id'] in rooms:
-                    send_data['status'] = 'ROOM ID EXIST'
-                else:
-                    send_data['status'] = 'ROOM ID DOES NOT EXIST'
-                
-                self.client.send(pickle.dumps(send_data))
+            if data['command'] == "GENERATE AVATAR":
+                self.generate_avatar(data)
+
+            if data['command'] == "ACTION":
+                self.action(data)
+
+    def create_room(self, data, client):
+        room_id = data['room_id']
+        rooms[room_id] = {"num_players": None, "player_list": []}
+        players_socket[room_id] = []
+        rooms[room_id]["num_players"] = data['num_players']
+        print(
+            f'>> {data["name"]} CREATE ROOM room_id={room_id} num players={data["num_players"]}')
+
+        self.join_room(data, client)
+
+    def get_detail_room(self, data):
+        room_id = data["room_id"]
+        send_data = {
+            'command': 'GET DETAIL ROOM',
+            'game_info': rooms[room_id]
+        }
+        self.client.send(pickle.dumps(send_data))
+
+    def join_room(self, data, client):
+        room_id = data['room_id']
+        if room_id in rooms:
+            player_details = {
+                "name": data['name'],
+                "role": "",
+                "status": "alive",
+                "has_voted": False,
+                "has_acted": False
+            }
+            rooms[room_id]["player_list"].append(player_details)
+
+            player_socket = {
+                "name": data['name'],
+                "socket": client
+            }
+            players_socket[room_id].append(player_socket)
+
+            print(f'>> {data["name"]} JOIN ROOM with id: {room_id}')
+            # print(f'>> server ROOM DETAILS={rooms}')
+            # print(f'>> server SOCKET DETAILS={players_socket}')
+
+    def check_room(self, data):
+        room_id = data['room_id']
+        send_data = {
+            'status': ''
+        }
+        if room_id in rooms:
+            send_data['status'] = 'EXIST'
+        else:
+            send_data['status'] = 'DOES NOT EXIST'
+        self.client.send(pickle.dumps(send_data))
+
+        print(
+            f'>> {data["name"]} CHECK ROOM room_id={room_id} -> status={send_data["status"]}')
+
+    def check_room_id(self, data):
+        send_data = {
+            'status' : ''
+        }
+
+        if data['room_id'] in rooms:
+            send_data['status'] = 'ROOM ID EXIST'
+        else:
+            send_data['status'] = 'ROOM ID DOES NOT EXIST'
+        
+        self.client.send(pickle.dumps(send_data))
+
+    def generate_avatar(self, data):
+        room_id = data["room_id"]
+        num_players = int(rooms[room_id]["num_players"])
+        if num_players == 4:
+            avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
+        elif num_players == 8:
+            avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
+                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
+        elif num_players == 12:
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Pemburu',
+                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
+
+        random.shuffle(avatars)
+
+        # Perform start game logic with avatars here
+        for i, player in enumerate(rooms[room_id]['player_list']):
+            avatar = avatars[i]
+            rooms[room_id]['player_list'][i]['role'] = avatar
+
+        send_data = {
+            'command': 'START GAME',
+            'game_info': rooms[room_id]
+        }
+        print(f'>> server GENERATING AVATAR')
+        self.broadcast(send_data, room_id)
+
+    def action(self, data):
+        room_id = data["room_id"]
+        if data["role"] == "Werewolf" or data["role"]  == "Hunter":
+            if data["action_subject"] in players_killed:
+                pass
+            else:
+                players_killed.append(data["action_subject"])
+                for player in rooms[room_id]['player_list']:
+                    if player['name'] == data["action_subject"]:
+                        player['status'] = 'dead'
+                print(f">> {data['player_name']}({data['role']}) kill {data['action_subject']}")
+
+        elif data["role"]  == "Peneliti":
+            role = None
+            for player in rooms[room_id]['player_list']:
+                if player['name'] == data["action_subject"]:
+                    role = player['role']
+
+            print(f">> {data['player_name']}({data['role']}) seek for {data['action_subject']}'s role={role}")
+
+    def broadcast(self, send_data, room_id):
+        for player in players_socket[room_id]:
+            player_socket = player["socket"]
+            player_socket.send(pickle.dumps(send_data))
+
 
 
 if __name__ == "__main__":
