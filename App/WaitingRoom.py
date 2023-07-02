@@ -106,6 +106,8 @@ class WaitingRoom(tk.Frame):
                         self.menu_manager.action = "Memeriksa Identitas Pemain"
                     elif self.menu_manager.role == "Hunter":
                         self.menu_manager.action = "Bunuh"
+                    elif self.menu_manager.role == "Dokter":
+                        self.menu_manager.action = "Melindungi"
                     else:
                         self.menu_manager.action = None
 

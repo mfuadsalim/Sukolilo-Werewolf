@@ -36,7 +36,7 @@ class Server:
         print(
             "============================================================================")
         print(
-            f"The Sukolilo Werewolf server is starting on {self.host} port {self.port}")
+            f"Sukolilo Werewolf server is starting on {self.host} port {self.port}")
         print(
             "============================================================================\n")
 
@@ -83,7 +83,6 @@ class Client(threading.Thread):
 
     def run(self):
         running = 1
-        print(client_sockets)
         print(f'address: {self.address}')
 
         while running:
@@ -132,6 +131,7 @@ class Client(threading.Thread):
     def join_room(self, data, client):
         room_id = data['room_id']
         if room_id in rooms:
+
             player_details = {
                 "name": data['name'],
                 "role": "",
@@ -157,7 +157,11 @@ class Client(threading.Thread):
             'status': ''
         }
         if room_id in rooms:
-            send_data['status'] = 'EXIST'
+            room_num = int(rooms[room_id]["num_players"])
+            if (len(rooms[room_id]["player_list"]) >= room_num):
+                send_data['status'] = 'FULL'
+            else:
+                send_data['status'] = 'EXIST'
         else:
             send_data['status'] = 'DOES NOT EXIST'
         self.client.send(pickle.dumps(send_data))
