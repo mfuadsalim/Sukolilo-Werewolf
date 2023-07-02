@@ -7,8 +7,7 @@ from App.MainMenu import MainMenu
 from App.PlayMenu import PlayMenu
 from App.CreateRoomMenu import CreateRoomMenu
 from App.JoinRoomMenu import JoinRoomMenu
-from App.HowToPlayMenu import HowToPlayMenu
-from App.GameRoom import GameRoom
+from App.AboutMenu import AboutMenu
 
 
 class Main(tk.Tk):
