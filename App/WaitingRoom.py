@@ -28,9 +28,9 @@ class WaitingRoom(tk.Frame):
 
     def load_image(self):
         self.background_image = Image.open('assets/BgWaitingRoom.png')
-        self.start_btn_image = Image.open('assets/button/Small Button Mulai.png')
-        self.hover_start_btn_image = Image.open('assets/button/Small Button Mulai Hover.png')
-        self.disabled_start_btn_image = Image.open('assets/button/Small Disabled Button Mulai.png')
+        self.start_btn_image = Image.open('assets/button/Small Button Siap.png')
+        self.hover_start_btn_image = Image.open('assets/button/Small Button Siap Hover.png')
+        self.disabled_start_btn_image = Image.open('assets/button/Small Disabled Button Siap.png')
 
         self.background_photo = ImageTk.PhotoImage(self.background_image)
         self.start_btn_photo = ImageTk.PhotoImage(self.start_btn_image)
@@ -54,6 +54,9 @@ class WaitingRoom(tk.Frame):
         self.player_list_value = tk.Label(self.background_canvas, text="", background='#ECE3D5', font=('Arial', 12))
         self.player_list_value.place(x=550, y=275)
 
+        self.ready_player_num = tk.Label(self.background_canvas, text="", background='#ECE3D5', font=('Arial', 12))
+        self.ready_player_num.place(x=710, y=505)
+
     def update(self):
         while self.is_running:
             send_data = {
@@ -74,21 +77,37 @@ class WaitingRoom(tk.Frame):
                     player_list = data["game_info"]['player_list']
                     player_names = '\n'.join([player['name']
                                               for player in player_list])
+                    # Count the 'ready_player_num' value and search for player object
+                    menu_player = {}
+                    player_ready = 0
+                    total_player = 0
+                    for player in player_list:
+                        if (player['name'] == self.menu_manager.name):
+                            menu_player = player
+
+                        if (player['is_ready']): 
+                            player_ready += 1
+                        total_player += 1
 
                     self.num_player_value.config(text=num_players)
                     self.player_list_value.config(text=player_names)
+                    self.ready_player_num.config(text=f"{player_ready}/{total_player}")
 
-                    if int(num_players) != len(player_list):
+                    if int(num_players) != len(player_list) or menu_player['is_ready']:
                         disabled_start_button = tk.Label(self.background_canvas, image=self.disabled_start_btn_photo, text="")
                         disabled_start_button.place(x=564, y=559)
                     else:
                         start_button = tk.Button(
-                            self.background_canvas, image=self.start_btn_photo, command=self.start_game, borderwidth=0)
+                            self.background_canvas, image=self.start_btn_photo, borderwidth=0,
+                            command=self.ready)
                         start_button.place(x=564, y=559)
                         start_button.bind('<Enter>', lambda event: start_button.config(
                             image=self.hover_start_btn_photo))
                         start_button.bind('<Leave>', lambda event: start_button.config(
                             image=self.start_btn_photo))
+                        
+                    if player_ready == total_player:
+                        self.start_game()
 
                     self.menu_manager.game_info = data["game_info"]
 
@@ -106,6 +125,8 @@ class WaitingRoom(tk.Frame):
                         self.menu_manager.action = "Memeriksa Identitas Pemain"
                     elif self.menu_manager.role == "Hunter":
                         self.menu_manager.action = "Bunuh"
+                    elif self.menu_manager.role == "Dokter":
+                        self.menu_manager.action = "Melindungi"
                     else:
                         self.menu_manager.action = None
 
@@ -119,6 +140,18 @@ class WaitingRoom(tk.Frame):
                 pass
 
             time.sleep(2)
+    
+    def ready(self):
+        disabled_start_button = tk.Label(self.background_canvas, image=self.disabled_start_btn_photo, text="")
+        disabled_start_button.place(x=564, y=559)
+        
+        send_data = {
+            'command': "PLAYER READY",
+            'room_id': self.menu_manager.room_id,
+            'name': self.menu_manager.name
+        }
+
+        self.menu_manager.socket.send(pickle.dumps(send_data))
 
     def start_game(self):
         send_data = {

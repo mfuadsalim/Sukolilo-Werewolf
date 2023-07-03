@@ -103,6 +103,8 @@ class JoinRoomMenu(tk.Frame):
 
             if data['status'] == 'DOES NOT EXIST':
                 messagebox.showerror("Error", "Ruangan tidak ditemukan")
+            elif data['status'] == 'FULL':
+                messagebox.showerror("Gagal Bergabung", "Ruangan sudah penuh")
             else:
                 send_data = {
                     'command': "JOIN ROOM",
