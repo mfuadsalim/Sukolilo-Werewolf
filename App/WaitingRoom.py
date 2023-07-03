@@ -4,8 +4,7 @@ from PIL import Image, ImageTk
 import threading
 import time
 
-from App.WelcomeGame import WelcomeGame
-
+from App.PlayerIntroduction import PlayerIntroduction
 
 class WaitingRoom(tk.Frame):
     def __init__(self, master, menu_manager):
@@ -119,6 +118,8 @@ class WaitingRoom(tk.Frame):
                         if player["name"] == self.menu_manager.name:
                             self.menu_manager.role = player["role"]
 
+                    self.menu_manager.num_players = num_players
+
                     if self.menu_manager.role == "Werewolf":
                         self.menu_manager.action = "Bunuh"
                     elif self.menu_manager.role == "Peneliti":
@@ -129,13 +130,17 @@ class WaitingRoom(tk.Frame):
                         self.menu_manager.action = "Melindungi"
                     else:
                         self.menu_manager.action = None
-
+                    
+                    if self.menu_manager.role == "Werewolf":
+                        self.menu_manager.team = "Werewolf"
+                    else:
+                        self.menu_manager.team = "Warga"
 
                     self.is_running = False
 
-                    self.menu_manager.menus["welcome_game"] = WelcomeGame(
-                        self.menu_manager, self.menu_manager)
-                    self.menu_manager.show_menu("welcome_game")
+                    self.menu_manager.menus["player_introduction"] = PlayerIntroduction(
+                        self.menu_manager, self.menu_manager, player_list)
+                    self.menu_manager.show_menu("player_introduction")
             except:
                 pass
 

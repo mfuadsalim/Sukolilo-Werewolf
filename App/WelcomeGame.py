@@ -4,7 +4,6 @@ from PIL import Image, ImageTk
 
 from App.Night import Night
 
-
 class WelcomeGame(tk.Frame):
     def __init__(self, master, menu_manager):
         super().__init__(master)
@@ -12,12 +11,11 @@ class WelcomeGame(tk.Frame):
         self.load_image()
         self.create_canvas()
         self.create_widgets()
-        self.start_timer(5)
+        self.start_timer(10)
 
 
     def load_image(self):
         self.background_image = Image.open('assets/BgWelcome.png')
-
         self.background_photo = ImageTk.PhotoImage(self.background_image)
 
     def create_canvas(self):

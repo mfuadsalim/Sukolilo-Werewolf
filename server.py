@@ -17,10 +17,58 @@ rooms = {
             {'name': 'Monica', 'role': '', 'status': 'alive',
                 'has_voted': False, 'has_acted': False, 'is_ready': True},
         ]
+    },
+    '234567': {
+        'num_players': '8',
+        'player_list': [
+            {'name': 'Isol', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol2', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol3', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol4', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol5', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Fuad', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Monica', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+        ]
+    },
+    '345678': {
+        'num_players': '12',
+        'player_list': [
+            {'name': 'Isol', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol2', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol3', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol4', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol5', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol6', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol7', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol8', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Isol9', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Fuad', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Monica', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
+        ]
     }
 }
 players_socket = {
-    '123456': []
+    '123456': [],
+    '234567': [],
+    '345678': []
 }
 
 players_killed = []
@@ -221,11 +269,13 @@ class Client(threading.Thread):
         if num_players == 4:
             avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 8:
-            avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
+            avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Dokter',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 12:
-            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Pemburu',
-                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf',
+                       'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf']
+            # avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Dokter',
+            #            'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
 
         random.shuffle(avatars)
 
