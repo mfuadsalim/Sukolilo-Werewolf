@@ -1,10 +1,9 @@
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 import pickle
 import threading
 import time
-
-from App.Chat import Chat
 
 class Vote(tk.Frame):
     def __init__(self, master, menu_manager):
@@ -17,9 +16,13 @@ class Vote(tk.Frame):
         self.start_timer(8)
 
     def load_image(self):
-        self.background_image = Image.open('assets/BgSiang.png')
+        self.background_image = Image.open('assets/BgVote.png')
+        self.vote_btn_image = Image.open('assets/button/Small Button Vote.png')
+        self.hover_vote_btn_image = Image.open('assets/button/Small Button Vote Hover.png')
 
         self.background_photo = ImageTk.PhotoImage(self.background_image)
+        self.vote_btn_photo = ImageTk.PhotoImage(self.vote_btn_image)
+        self.hover_vote_btn_photo = ImageTk.PhotoImage(self.hover_vote_btn_image)
 
     def create_canvas(self):
         self.background_canvas = tk.Canvas(
@@ -32,11 +35,37 @@ class Vote(tk.Frame):
         role = self.menu_manager.role
         name = self.menu_manager.name
 
+        self.player = tk.StringVar(self)
+        players_name = []
+        data = self.menu_manager.game_info
+        for player in data["player_list"]:
+            if player["status"] == "alive" and player["name"] != self.menu_manager.name:
+                players_name.append(player["name"])
+
+        self.player_dropdown = ttk.OptionMenu(
+            self, self.player, *players_name)
+        self.player_dropdown.place(x=600, y=360)
+
+        self.vote_button = tk.Button(
+            self.background_canvas, image=self.vote_btn_photo, command=self.vote, borderwidth=0)
+        self.vote_button.place(x=696, y=421)
+        self.vote_button.bind('<Enter>', lambda event: self.vote_button.config(
+            image=self.hover_vote_btn_photo))
+        self.vote_button.bind('<Leave>', lambda event: self.vote_button.config(
+            image=self.vote_btn_photo))
+        self.vote_button.place(x=564, y=464)
+
+        text = f"{name}({role})"
+        self.name_role_text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5',
+                                       font=('Arial', 12))
+        self.name_role_text.place(x=205, y=620)
+
         self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12",
                                     font=('Arial', 32))
         self.timer_label.place(x=1015, y=585)
 
-
+    def vote(self):
+        pass
 
     def start_timer(self, seconds):
         self.remaining_time = seconds

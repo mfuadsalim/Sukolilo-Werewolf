@@ -9,6 +9,7 @@ from App.CreateRoomMenu import CreateRoomMenu
 from App.JoinRoomMenu import JoinRoomMenu
 from App.AboutMenu import AboutMenu
 from App.Chat import Chat
+from App.Vote import Vote
 
 class Main_Test(tk.Tk):
     def __init__(self):
@@ -60,7 +61,7 @@ class Main_Test(tk.Tk):
         self.menus["play"] = PlayMenu(self, self)
         self.menus["create"] = CreateRoomMenu(self, self)
         self.menus["join"] = JoinRoomMenu(self, self)
-        self.menus["chat"] = Chat(self, self)
+        self.menus["chat"] = Vote(self, self)
 
     def configure_style(self):
         style = ttk.Style()

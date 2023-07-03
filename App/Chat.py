@@ -5,7 +5,7 @@ import pickle
 import threading
 import time
 
-# from App.Vote import Vote
+from App.Vote import Vote
 
 
 class Chat(tk.Frame):
@@ -22,7 +22,7 @@ class Chat(tk.Frame):
         self.chat_thread.daemon = True
         self.chat_thread.start()
 
-        self.start_timer(60)
+        self.start_timer(30)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgChat.png')
@@ -41,6 +41,9 @@ class Chat(tk.Frame):
             0, 0, anchor=tk.NW, image=self.background_photo)
 
     def create_widgets(self):
+        role = self.menu_manager.role
+        name = self.menu_manager.name
+
         # Create the chat display text box
         self.chat_display = tk.Text(self.background_canvas, height=15, width=70, foreground="#37342f", background='#ECE3D5', font=('Arial', 16))
         self.chat_display.configure(state=tk.DISABLED)
@@ -60,6 +63,11 @@ class Chat(tk.Frame):
         self.submit_button.bind('<Leave>', lambda event: self.submit_button.config(
             image=self.submit_btn_photo))
         self.submit_button.place(x=590, y=602)
+
+        text = f"{name}({role})"
+        self.name_role_text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5',
+                                       font=('Arial', 12))
+        self.name_role_text.place(x=205, y=620)
 
         self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12",
                                     font=('Arial', 32))
@@ -131,6 +139,6 @@ class Chat(tk.Frame):
             self.is_running = False
             self.chat_messages = []
 
-            # self.menu_manager.menus["vote"] = Vote(
-            #     self.menu_manager, self.menu_manager)
-            # self.menu_manager.show_menu("vote")
+            self.menu_manager.menus["vote"] = Vote(
+                self.menu_manager, self.menu_manager)
+            self.menu_manager.show_menu("vote")

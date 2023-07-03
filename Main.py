@@ -19,6 +19,7 @@ class Main(tk.Tk):
         self.screen_height = 720
         self.geometry(f"{self.screen_width}x{self.screen_height}")
         self.resizable(False, False)
+        self.iconbitmap('assets/logo.ico')
         # # Get screen resolution
         # user32 = ctypes.windll.user32
         # self.screen_width = user32.GetSystemMetrics(0)
