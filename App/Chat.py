@@ -5,6 +5,9 @@ import pickle
 import threading
 import time
 
+# from App.Vote import Vote
+
+
 class Chat(tk.Frame):
     def __init__(self, master, menu_manager):
         super().__init__(master)
@@ -126,3 +129,8 @@ class Chat(tk.Frame):
             self.after(1000, self.update_timer)
         else:
             self.is_running = False
+            self.chat_messages = []
+
+            # self.menu_manager.menus["vote"] = Vote(
+            #     self.menu_manager, self.menu_manager)
+            # self.menu_manager.show_menu("vote")
