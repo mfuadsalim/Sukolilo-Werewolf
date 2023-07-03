@@ -134,7 +134,7 @@ class Night(tk.Frame):
                 self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
                 self.role_card.configure(image=self.role_card_photo)
             elif role == "Werewolf" or role == "Hunter":
-                text = f"Anda berhasil membunuh {self.player.get()}"
+                text = f"Anda akan membunuh {self.player.get()}"
 
             text_after_act = tk.Label(self.background_canvas, text=text, background='#ECE3D5',
                                       font=('Arial', 12))
