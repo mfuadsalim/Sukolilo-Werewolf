@@ -8,9 +8,9 @@ from App.PlayMenu import PlayMenu
 from App.CreateRoomMenu import CreateRoomMenu
 from App.JoinRoomMenu import JoinRoomMenu
 from App.AboutMenu import AboutMenu
+from App.Chat import Chat
 
-
-class Main(tk.Tk):
+class Main_Test(tk.Tk):
     def __init__(self):
         super().__init__()
         # Window Configuration
@@ -60,6 +60,7 @@ class Main(tk.Tk):
         self.menus["play"] = PlayMenu(self, self)
         self.menus["create"] = CreateRoomMenu(self, self)
         self.menus["join"] = JoinRoomMenu(self, self)
+        self.menus["chat"] = Chat(self, self)
 
     def configure_style(self):
         style = ttk.Style()
@@ -71,7 +72,7 @@ class Main(tk.Tk):
         self.show_menu("play")
 
     def show_main_menu(self):
-        self.show_menu("main")
+        self.show_menu("chat")
 
     def show_menu(self, menu_name):
         if self.current_menu:
@@ -81,5 +82,5 @@ class Main(tk.Tk):
 
 
 if __name__ == "__main__":
-    menu_manager = Main()
+    menu_manager = Main_Test()
     menu_manager.mainloop()

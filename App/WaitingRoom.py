@@ -20,11 +20,11 @@ class WaitingRoom(tk.Frame):
         self.create_widgets()
 
         # Start a separate thread to continuously update the player list
-        self.update_thread = threading.Thread(target=self.update)
+        self.waiting_room_thread = threading.Thread(target=self.update)
         self.is_running = True
         # Set the thread as a daemon to stop it when the main thread exits
-        self.update_thread.daemon = True
-        self.update_thread.start()
+        self.waiting_room_thread.daemon = True
+        self.waiting_room_thread.start()
 
     def load_image(self):
         self.background_image = Image.open('assets/BgWaitingRoom.png')
@@ -63,10 +63,12 @@ class WaitingRoom(tk.Frame):
             }
 
             self.menu_manager.socket.send(pickle.dumps(send_data))
+            # print(f'>> Send data to server: {send_data}')
 
             try:
                 data = self.menu_manager.socket.recv(2048)
                 data = pickle.loads(data)
+                # print(data)
                 if data["command"] == "GET DETAIL ROOM":
                     # Access the 'num_players' value
                     num_players = data["game_info"]['num_players']
@@ -100,6 +102,8 @@ class WaitingRoom(tk.Frame):
                         if player["name"] == self.menu_manager.name:
                             self.menu_manager.role = player["role"]
 
+                    print(f">> Set role to: {self.menu_manager.role}")
+
                     if self.menu_manager.role == "Werewolf":
                         self.menu_manager.action = "Bunuh"
                     elif self.menu_manager.role == "Peneliti":
@@ -121,9 +125,12 @@ class WaitingRoom(tk.Frame):
             time.sleep(2)
 
     def start_game(self):
+        print("mashok")
         send_data = {
             'command': "GENERATE AVATAR",
             'room_id': self.menu_manager.room_id,
         }
 
         self.menu_manager.socket.send(pickle.dumps(send_data))
+        print(f'>> Send data to server: {send_data}')
+
