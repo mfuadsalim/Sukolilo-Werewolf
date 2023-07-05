@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import pickle
+import threading
+
+from App.Day import Day
 
 
 class Night(tk.Frame):
@@ -11,7 +14,14 @@ class Night(tk.Frame):
         self.load_image()
         self.create_canvas()
         self.create_widgets()
-        self.start_timer(30)
+
+        self.night_thread = threading.Thread(target=self.update)
+        self.is_running = True
+        # Set the thread as a daemon to stop it when the main thread exits
+        self.night_thread.daemon = True
+        self.night_thread.start()
+
+        self.start_timer(15)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgMalam.png')
@@ -35,12 +45,17 @@ class Night(tk.Frame):
 
     def create_widgets(self):
         role = self.menu_manager.role
-        action = self.menu_manager.action
+        name = self.menu_manager.name
 
         role_card_path = 'assets/RoleCard' + role + '.png'
         self.role_card_image = Image.open(role_card_path)
         self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
         self.role_card = tk.Label(self.background_canvas, image=self.role_card_photo, background='#ECE3D5')
+
+        text = f"{name}({role})"
+        self.name_role_text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5',
+                             font=('Arial', 12))
+        self.name_role_text.place(x=286, y=578)
 
         if role == "Mahasiswa":
             self.text_malam = tk.Label(self.background_canvas, image=self.text_malam_2_photo, background='#ECE3D5')
@@ -70,9 +85,25 @@ class Night(tk.Frame):
             self.do_button.bind('<Leave>', lambda event: self.do_button.config(
                 image=self.do_btn_photo))
 
-        self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12",
+        self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#4f4960",
                                     font=('Arial', 32))
         self.timer_label.place(x=945, y=550)
+
+    def update(self):
+        role = self.menu_manager.role
+        while self.is_running:
+            try:
+                if role != "Mahasiswa":
+                    data = self.menu_manager.socket.recv(2048)
+                    data = pickle.loads(data)
+                    print(f">> Send data to server: {data}")
+                    if data["command"] == "RESPONSE ACTION":
+                        self.subject_role = data["role"]
+                        self.is_running = False
+                    elif data["command"] == "None":
+                        self.is_running = False
+            except:
+                pass
 
     def action(self):
         player_name = self.player.get()
@@ -97,7 +128,11 @@ class Night(tk.Frame):
             self.do_button.destroy()
             self.player_dropdown.destroy()
             if role == "Peneliti":
-                text = f"{self.player.get()} adalah seorang ..."
+                text = f"{self.player.get()} adalah seorang {self.subject_role}"
+                role_card_path = 'assets/RoleCard' + self.subject_role + '.png'
+                self.role_card_image = Image.open(role_card_path)
+                self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
+                self.role_card.configure(image=self.role_card_photo)
             elif role == "Werewolf" or role == "Hunter":
                 text = f"Anda akan membunuh {self.player.get()}"
 
@@ -115,7 +150,9 @@ class Night(tk.Frame):
             self.remaining_time -= 1
             self.after(1000, self.update_timer)
         else:
-            pass
+            self.menu_manager.menus["day"] = Day(
+                self.menu_manager, self.menu_manager)
+            self.menu_manager.show_menu("day")
 
 
 
