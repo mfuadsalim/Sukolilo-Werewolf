@@ -16,11 +16,10 @@ class Day(tk.Frame):
 
         self.day_thread = threading.Thread(target=self.update)
         self.is_running = True
-        # Set the thread as a daemon to stop it when the main thread exits
         self.day_thread.daemon = True
         self.day_thread.start()
 
-        self.start_timer(8)
+        self.start_timer(5)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgSiang.png')

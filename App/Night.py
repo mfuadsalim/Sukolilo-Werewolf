@@ -13,6 +13,7 @@ class Night(tk.Frame):
         self.menu_manager = menu_manager
         self.load_image()
         self.create_canvas()
+        self.create_profile()
         self.create_widgets()
 
         self.night_thread = threading.Thread(target=self.update)
@@ -21,13 +22,14 @@ class Night(tk.Frame):
         self.night_thread.daemon = True
         self.night_thread.start()
 
-        self.start_timer(15)
+        self.start_timer(10)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgMalam.png')
         self.do_btn_image = Image.open('assets/button/Small Button Lakukan.png')
         self.hover_do_btn_image = Image.open('assets/button/Small Button Lakukan Hover.png')
         self.text_malam_1_image = Image.open('assets/TextMalam1.png')
+        self.text_malam_2_image = Image.open('assets/TextMalam2.png')
         self.text_malam_2_image = Image.open('assets/TextMalam2.png')
 
         self.background_photo = ImageTk.PhotoImage(self.background_image)
@@ -42,6 +44,85 @@ class Night(tk.Frame):
         self.background_canvas.pack()
         self.background_canvas.create_image(
             0, 0, anchor=tk.NW, image=self.background_photo)
+    
+    def create_profile(self):
+        self.avatar_dead_image = Image.open('assets/AvatarDead.png')
+        self.avatar_mahasiswa_image = Image.open('assets/AvatarMahasiswa.png')
+        self.selected_avatar_mahasiswa_image = Image.open('assets/AvatarMahasiswaSelected.png')
+        self.avatar_dokter_image = Image.open('assets/AvatarDokter.png')
+        self.selected_avatar_dokter_image = Image.open('assets/AvatarDokterSelected.png')
+        self.avatar_pemburu_image = Image.open('assets/AvatarPemburu.png')
+        self.avatar_peneliti_image = Image.open('assets/AvatarPeneliti.png')
+        self.avatar_werewolf_image = Image.open('assets/AvatarWerewolf.png')
+        self.avatar_werewolf_dead_image = Image.open('assets/AvatarWerewolfDead.png')
+
+        self.avatar_dead_photo = ImageTk.PhotoImage(self.avatar_dead_image)
+        self.avatar_mahasiswa_photo = ImageTk.PhotoImage(self.avatar_mahasiswa_image)
+        self.selected_avatar_mahasiswa_photo = ImageTk.PhotoImage(self.selected_avatar_mahasiswa_image)
+        self.avatar_dokter_photo = ImageTk.PhotoImage(self.avatar_dokter_image)
+        self.selected_avatar_dokter_photo = ImageTk.PhotoImage(self.selected_avatar_dokter_image)
+        self.avatar_pemburu_photo = ImageTk.PhotoImage(self.avatar_pemburu_image)
+        self.avatar_peneliti_photo = ImageTk.PhotoImage(self.avatar_peneliti_image)
+        self.avatar_werewolf_photo = ImageTk.PhotoImage(self.avatar_werewolf_image)
+        self.avatar_werewolf_dead_photo = ImageTk.PhotoImage(self.avatar_werewolf_dead_image)
+
+        role = self.menu_manager.role
+
+        player_avatars = []
+        player_names = []
+
+        data = self.menu_manager.game_info
+
+        for count, player in enumerate(data["player_list"]):
+            player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',
+                                    font=('Arial', 12))
+            
+            if player['status'] == 'dead':
+                if player['role'] == 'Werewolf':
+                    avatar = tk.Label(self.background_canvas, image=self.avatar_werewolf_dead_photo, background='#50477D')
+                else:
+                    avatar = tk.Label(self.background_canvas, image=self.avatar_dead_photo, background='#50477D')
+            elif role == "Werewolf" and player['role'] == "Werewolf":
+                avatar = tk.Label(self.background_canvas, image=self.avatar_werewolf_photo, background='#50477D')
+            elif role == "Peneliti" and player['role'] == "Peneliti":
+                avatar = tk.Label(self.background_canvas, image=self.avatar_peneliti_photo, background='#50477D')
+            elif role == "Pemburu" and player['role'] == "Pemburu":
+                avatar = tk.Label(self.background_canvas, image=self.avatar_pemburu_photo, background='#50477D')
+            else:
+                avatar = tk.Label(self.background_canvas, image=self.avatar_mahasiswa_photo, background='#50477D')
+
+            if self.menu_manager.num_players == '4':
+                if count < 2:
+                    avatar.place(x=126, y=260+160*count)
+                    player_name.place(x=126, y=340+160*count)
+                else:
+                    avatar.place(x=1090, y=260+160*(count%2))
+                    player_name.place(x=1090, y=340+160*(count%2))
+            
+            elif self.menu_manager.num_players == '8':
+                if count < 4:
+                    avatar.place(x=126, y=175+120*count)
+                    player_name.place(x=126, y=255+120*count)
+                else:
+                    avatar.place(x=1090, y=175+120*(count%4))
+                    player_name.place(x=1090, y=255+120*(count%4))
+            
+            elif self.menu_manager.num_players == '12':
+                if count < 2:
+                    avatar.place(x=49, y=175+120*(1+count))
+                    player_name.place(x=49, y=255+120*(1+count))
+                elif count < 6:
+                    avatar.place(x=154, y=175+120*(count-2))
+                    player_name.place(x=154, y=255+120*(count-2))
+                elif count < 10:
+                    avatar.place(x=1066, y=175+120*(count-6))
+                    player_name.place(x=1066, y=255+120*(count-6))
+                else:
+                    avatar.place(x=1172, y=175+120*(1+count-10))
+                    player_name.place(x=1172, y=255+120*(1+count-10))
+
+            player_avatars.append(avatar)
+            player_names.append(player_name)
 
     def create_widgets(self):
         role = self.menu_manager.role
@@ -52,10 +133,10 @@ class Night(tk.Frame):
         self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
         self.role_card = tk.Label(self.background_canvas, image=self.role_card_photo, background='#ECE3D5')
 
-        text = f"{name}({role})"
-        self.name_role_text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5',
-                             font=('Arial', 12))
-        self.name_role_text.place(x=286, y=578)
+        # text = f"Identitasmu: {name}({role})"
+        # self.name_role_text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5',
+        #                      font=('Arial', 12))
+        # self.name_role_text.place(x=286, y=578)
 
         if role == "Mahasiswa":
             self.text_malam = tk.Label(self.background_canvas, image=self.text_malam_2_photo, background='#ECE3D5')
@@ -70,7 +151,7 @@ class Night(tk.Frame):
             players_name = []
             data = self.menu_manager.game_info
             for player in data["player_list"]:
-                if player["status"] == "alive" and player["name"] != self.menu_manager.name:
+                if player["status"] == "alive" and player["name"] != self.menu_manager.name and player["role"] != self.menu_manager.role:
                     players_name.append(player["name"])
 
             self.player_dropdown = ttk.OptionMenu(

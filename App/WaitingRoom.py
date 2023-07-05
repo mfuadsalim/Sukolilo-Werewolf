@@ -143,7 +143,7 @@ class WaitingRoom(tk.Frame):
                     self.is_running = False
 
                     self.menu_manager.menus["player_introduction"] = PlayerIntroduction(
-                        self.menu_manager, self.menu_manager, player_list)
+                        self.menu_manager, self.menu_manager)
                     self.menu_manager.show_menu("player_introduction")
             except:
                 pass
@@ -163,7 +163,6 @@ class WaitingRoom(tk.Frame):
         self.menu_manager.socket.send(pickle.dumps(send_data))
 
     def start_game(self):
-        print("mashok")
         send_data = {
             'command': "GENERATE AVATAR",
             'room_id': self.menu_manager.room_id,

@@ -5,14 +5,13 @@ from PIL import Image, ImageTk
 from App.WelcomeGame import WelcomeGame
 
 class PlayerIntroduction(tk.Frame):
-    def __init__(self, master, menu_manager, player_list):
+    def __init__(self, master, menu_manager):
         super().__init__(master)
         self.menu_manager = menu_manager
-        self.player_list = player_list
         self.load_image()
         self.create_canvas()
         self.create_widgets()
-        self.start_timer(10)
+        self.start_timer(1)
 
 
     def load_image(self):
@@ -31,8 +30,7 @@ class PlayerIntroduction(tk.Frame):
         player_count = 0
 
         if self.menu_manager.team == "Warga":
-            for count, player in enumerate(self.player_list):
-                print("aaa")
+            for count, player in enumerate(self.menu_manager.game_info["player_list"]):
                 if self.menu_manager.num_players == '4':
                     player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',
                                     font=('Arial', 16))
@@ -59,16 +57,18 @@ class PlayerIntroduction(tk.Frame):
                 player_names.append(player_name)
                 player_count += 1
         else:
-            for count, player in enumerate(self.player_list):
+            for count, player in enumerate(self.menu_manager.player_list):
                 if player['role'] == 'Werewolf':
                     if self.menu_manager.num_players == '4':
-                        player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',
-                                    font=('Arial', 16))
-                        player_name.place(x=559, y=570)
+                        if player_count < 1:
+                            player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',
+                                        font=('Arial', 16))
+                            player_name.place(x=559, y=570)
                     elif self.menu_manager.num_players == '8':
-                        player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',
-                                    font=('Arial', 16))
-                        player_name.place(x=456+player_count*212, y=570)
+                        if player_count < 2:
+                            player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',
+                                        font=('Arial', 16))
+                            player_name.place(x=456+player_count*212, y=570)
                     elif self.menu_manager.num_players == '12':
                         if player_count < 3:
                             player_name = tk.Label(self.background_canvas, text=player['name'], background='#2A2545', foreground='#ECE3D5',

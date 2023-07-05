@@ -275,15 +275,12 @@ class Client(threading.Thread):
         avatars = []
         if num_players == 4:
             avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
-            # avatars = ['Peneliti', 'Peneliti', 'Peneliti', 'Peneliti']
         elif num_players == 8:
-            avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Dokter',
+            avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 12:
-            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf',
-                       'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf', 'Werewolf']
-            # avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Dokter',
-            #            'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
+            avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Pemburu',
+                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
 
         random.shuffle(avatars)
 
@@ -291,6 +288,7 @@ class Client(threading.Thread):
         for i, player in enumerate(rooms[room_id]['player_list']):
             avatar = avatars[i]
             rooms[room_id]['player_list'][i]['role'] = avatar
+            print(rooms[room_id]['player_list'][i]['role'])
 
         send_data = {
             'command': 'START GAME',
