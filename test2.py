@@ -1,52 +1,17 @@
-import tkinter as tk
+from collections import Counter
 
-class ChatWindow(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.chat_messages = []
-        self.create_widgets()
+def get_winner(votes):
+    vote_counts = Counter(votes)
+    most_common = vote_counts.most_common(2)
+    if len(most_common) == 1 or most_common[0][1] > most_common[1][1]:
+        return most_common[0][0]
+    else:
+        return None
 
-    def create_widgets(self):
-        # Create the chat display text box
-        self.chat_display = tk.Text(self, height=10, width=50)
-        self.chat_display.pack()
+voting_results = ['w', 'e', 'r', 'q']
+winner = get_winner(voting_results)
 
-        # Create the chat entry
-        self.chat_entry = tk.Entry(self, width=50)
-        self.chat_entry.pack()
-
-        # Create the submit button
-        self.submit_button = tk.Button(self, text="Submit", command=self.submit_chat)
-        self.submit_button.pack()
-
-    def submit_chat(self):
-        # Get the chat message from the chat entry
-        message = self.chat_entry.get()
-
-        # Clear the chat entry
-        self.chat_entry.delete(0, tk.END)
-
-        # Add the chat message to the chat messages list
-        self.chat_messages.append(message)
-
-        # Update the chat display
-        self.update_chat_display()
-
-    def update_chat_display(self):
-        # Clear the chat display
-        self.chat_display.delete(1.0, tk.END)
-
-        # Display the latest chat messages in reverse order (bottom to top)
-        start_index = max(0, len(self.chat_messages) - 10)  # Limit the display to 10 messages
-        for message in self.chat_messages[start_index:]:
-            self.chat_display.insert(tk.END, message + "\n")
-
-# Create the main window
-root = tk.Tk()
-
-# Create the chat window
-chat_window = ChatWindow(root)
-chat_window.pack()
-
-# Start the Tkinter event loop
-root.mainloop()
+if winner:
+    print(f"The player with the most votes is: {winner}")
+else:
+    print("There is no clear winner.")

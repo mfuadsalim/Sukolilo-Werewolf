@@ -4,6 +4,7 @@ import sys
 import threading
 import pickle
 import random
+from collections import Counter
 
 client_sockets = []
 rooms = {
@@ -70,6 +71,13 @@ rooms = {
     }
 }
 players_socket = {
+    '123456': [],
+    '234567': [],
+    '345678': [],
+    '444': []
+}
+
+players_voted = {
     '123456': [],
     '234567': [],
     '345678': [],
@@ -174,6 +182,12 @@ class Client(threading.Thread):
                 if data['command'] == "CHAT":
                     self.chat(data)
 
+                if data['command'] == "VOTE":
+                    self.vote(data)
+
+                if data['command'] == "VOTE RESULT":
+                    self.vote_result(data)
+
             except ConnectionResetError as e:
                 if "WinError 10054" in str(e):
                     player_name = ""
@@ -196,6 +210,7 @@ class Client(threading.Thread):
         room_id = data['room_id']
         rooms[room_id] = {"num_players": None, "player_list": []}
         players_socket[room_id] = []
+        players_voted[room_id] = []
         rooms[room_id]["num_players"] = data['num_players']
         print(
             f'>> {data["name"]} CREATE ROOM room_id={room_id} num players={data["num_players"]}')
@@ -369,8 +384,40 @@ class Client(threading.Thread):
             'command': "RESPONSE CHAT",
             'chat_messages': message
         }
-        print(f"{room_id} {data['name']}({data['role']}) Chat: {data['message']}")
+        print(f">> {room_id} {data['name']}({data['role']}) Chat: {data['message']}")
         self.broadcast(send_data, room_id)
+
+    def vote(self, data):
+        room_id = data["room_id"]
+
+        players_voted[room_id].append(data["player_voted"])
+
+        print(f">> {room_id} {data['name']}({data['role']}) Voted for: {data['player_voted']}")
+        print(players_voted)
+
+    def vote_result(self, data):
+        room_id = data["room_id"]
+        player_list = rooms[room_id]["player_list"]
+
+        vote_counts = Counter(players_voted[room_id])
+        most_common = vote_counts.most_common(2)
+        if len(most_common) == 1 or most_common[0][1] > most_common[1][1]:
+            for player in player_list:
+                if (player["name"] == most_common[0][0]):
+                    player["status"] = 'voted'
+
+            vote_result = f"{most_common[0][0]} telah dikeluarkan berdasarkan voting terbanyak"
+        else:
+            vote_result = "Tidak ada pemain yang dikeluarkan"
+
+        send_data = {
+            'command' : "RESPONSE VOTE RESULT",
+            'game_info' : rooms[room_id],
+            'vote_result' : vote_result
+        }
+
+        self.client.send(pickle.dumps(send_data))
+        print(f">> {room_id} {data['name']}({data['role']}) Get vote result: {send_data['vote_result']}")
 
     def broadcast(self, send_data, room_id):
         for player in players_socket[room_id]:
