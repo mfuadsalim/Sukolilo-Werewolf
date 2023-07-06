@@ -168,7 +168,7 @@ class Client(threading.Thread):
                 if data['command'] == "GET NIGHT RESULT":
                     self.get_night_result(data)
                 
-                if data['command'] == "SUMMARIZE NIGHTT":
+                if data['command'] == "SUMMARIZE NIGHT":
                     self.summarize_night(data)
 
                 if data['command'] == "CHAT":
