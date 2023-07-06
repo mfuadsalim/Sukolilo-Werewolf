@@ -15,7 +15,7 @@ class Day(tk.Frame):
         self.create_profile()
         self.create_widgets()
         self.show_summary()
-        self.start_timer(8)
+        self.start_timer(2)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgSiang.png')
@@ -147,6 +147,13 @@ class Day(tk.Frame):
                     is_receiving = False
 
             self.menu_manager.game_info = data["game_info"]
+
+            for player in data["game_info"]["player_list"]:
+                if player['name'] == self.menu_manager.name:
+                    if player['status'] == 'dead':
+                        self.menu_manager.status = 'dead'
+                    elif player['status'] == 'alive':
+                        self.menu_manager.status = 'alive'
 
             self.is_running = False
             self.menu_manager.menus["chat"] = Chat(

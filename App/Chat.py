@@ -29,10 +29,12 @@ class Chat(tk.Frame):
         self.background_image = Image.open('assets/BgChat.png')
         self.submit_btn_image = Image.open('assets/button/Small Button Kirim.png')
         self.hover_submit_btn_image = Image.open('assets/button/Small Button Kirim Hover.png')
+        self.disabled_submit_btn_image = Image.open('assets/button/Small Disabled Button Kirim.png')
 
         self.background_photo = ImageTk.PhotoImage(self.background_image)
         self.submit_btn_photo = ImageTk.PhotoImage(self.submit_btn_image)
         self.hover_submit_btn_photo = ImageTk.PhotoImage(self.hover_submit_btn_image)
+        self.disabled_submit_btn_photo = ImageTk.PhotoImage(self.disabled_submit_btn_image)
 
     def create_canvas(self):
         self.background_canvas = tk.Canvas(
@@ -115,14 +117,17 @@ class Chat(tk.Frame):
         self.chat_entry.place(x=295, y=520)
 
         # Create the submit button
-        self.submit_button = tk.Button(
-            self.background_canvas, image=self.submit_btn_photo, command=self.submit_chat, borderwidth=0)
-        self.submit_button.place(x=696, y=421)
-        self.submit_button.bind('<Enter>', lambda event: self.submit_button.config(
-            image=self.hover_submit_btn_photo))
-        self.submit_button.bind('<Leave>', lambda event: self.submit_button.config(
-            image=self.submit_btn_photo))
-        self.submit_button.place(x=590, y=580)
+        if self.menu_manager.status == 'dead':
+            self.submit_button = tk.Label(self.background_canvas, image=self.disabled_submit_btn_photo, text="")
+            self.submit_button.place(x=590, y=580)
+        elif self.menu_manager.status == 'alive':
+            self.submit_button = tk.Button(
+                self.background_canvas, image=self.submit_btn_photo, command=self.submit_chat, borderwidth=0)
+            self.submit_button.bind('<Enter>', lambda event: self.submit_button.config(
+                image=self.hover_submit_btn_photo))
+            self.submit_button.bind('<Leave>', lambda event: self.submit_button.config(
+                image=self.submit_btn_photo))
+            self.submit_button.place(x=590, y=580)
 
         self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12", font=('Arial', 32))
         self.timer_label.place(x=950, y=590)

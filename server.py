@@ -14,8 +14,8 @@ rooms = {
                 'has_voted': False, 'has_acted': False, 'is_ready': True},
             {'name': 'Fuad', 'role': '', 'status': 'alive',
                 'has_voted': False, 'has_acted': False, 'is_ready': True},
-            {'name': 'Monica', 'role': '', 'status': 'alive',
-                'has_voted': False, 'has_acted': False, 'is_ready': True},
+            # {'name': 'Monica', 'role': '', 'status': 'alive',
+            #     'has_voted': False, 'has_acted': False, 'is_ready': True},
         ]
     },
     '234567': {
@@ -279,7 +279,7 @@ class Client(threading.Thread):
         avatars = []
         if num_players == 4:
             # avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
-            avatars = ['Werewolf', 'Dokter', 'Dokter', 'Pemburu']
+            avatars = ['Werewolf', 'Dokter', 'Pemburu', 'Pemburu']
         elif num_players == 8:
             avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
