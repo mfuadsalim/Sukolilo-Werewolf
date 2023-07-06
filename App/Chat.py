@@ -175,7 +175,7 @@ class Chat(tk.Frame):
         self.chat_display.delete(1.0, tk.END)
 
         # Display the latest chat messages in the correct order (top to bottom)
-        start_index = max(0, len(self.chat_messages) - 15)  # Limit the display to 15 messages
+        start_index = max(0, len(self.chat_messages) - 12)  # Limit the display to 12 messages
         chat_messages_to_display = self.chat_messages[start_index:]
 
         # Insert the chat messages into the chat display
