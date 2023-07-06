@@ -297,10 +297,10 @@ class Client(threading.Thread):
             avatars = ['Werewolf', 'Pemburu', 'Pemburu', 'Pemburu']
         elif num_players == 8:
             avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
-                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
+                       'Dokter', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
         elif num_players == 12:
             avatars = ['Werewolf', 'Werewolf', 'Werewolf', 'Peneliti', 'Peneliti', 'Pemburu',
-                       'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
+                       'Dokter', 'Dokter', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
 
         random.shuffle(avatars)
 
