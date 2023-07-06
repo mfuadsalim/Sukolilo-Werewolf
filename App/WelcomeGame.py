@@ -95,7 +95,7 @@ class WelcomeGame(tk.Frame):
         role_desc.place(x=553, y=311)
 
         self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12", font=('Arial', 32))
-        self.timer_label.place(x=945, y=550)
+        self.timer_label.place(x=950, y=590)
 
     def start_timer(self, seconds):
         self.remaining_time = seconds

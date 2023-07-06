@@ -131,21 +131,22 @@ class Night(tk.Frame):
         if role == "Mahasiswa":
             self.text_malam = tk.Label(self.background_canvas, image=self.text_malam_2_photo, background='#ECE3D5')
             self.text_malam.place(x=444, y=183)
-            self.role_card.place(x=540, y=282)
+            self.role_card.place(x=540, y=311)
         else:
             self.text_malam = tk.Label(self.background_canvas, image=self.text_malam_1_photo, background='#ECE3D5')
             self.text_malam.place(x=312, y=183)
-            self.role_card.place(x=344, y=282)
+            self.role_card.place(x=330, y=311)
 
             self.player_subject = tk.StringVar(self)
             players_name = []
             data = self.menu_manager.game_info
             for player in data["player_list"]:
-                if player['role'] != 'Dokter':
-                    if player["status"] == "alive" and player["name"] != self.menu_manager.name and player["role"] != self.menu_manager.role:
+                if player["status"] == "alive": 
+                    if player['role'] != 'Dokter':
+                        if player["name"] != self.menu_manager.name and player["role"] != self.menu_manager.role:
+                            players_name.append(player["name"])
+                    else:
                         players_name.append(player["name"])
-                else:
-                    players_name.append(player["name"])
 
             self.player_dropdown = ttk.OptionMenu(
                 self, self.player_subject, *players_name)
@@ -161,7 +162,7 @@ class Night(tk.Frame):
 
         self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#4f4960",
                                     font=('Arial', 32))
-        self.timer_label.place(x=945, y=550)
+        self.timer_label.place(x=950, y=590)
 
     def action(self):
         player_name = self.player_subject.get()

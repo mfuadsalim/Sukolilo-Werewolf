@@ -89,9 +89,8 @@ class Day(tk.Frame):
             player_names.append(player_name)
 
     def create_widgets(self):
-        self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12",
-                                    font=('Arial', 32))
-        self.timer_label.place(x=945, y=550)
+        self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12", font=('Arial', 32))
+        self.timer_label.place(x=950, y=590)
 
     def show_summary(self):
         any_death = False
@@ -148,8 +147,6 @@ class Day(tk.Frame):
                     is_receiving = False
 
             self.menu_manager.game_info = data["game_info"]
-
-            print(data["game_info"])
 
             self.is_running = False
             self.menu_manager.menus["chat"] = Chat(

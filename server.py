@@ -293,7 +293,6 @@ class Client(threading.Thread):
         for i, player in enumerate(rooms[room_id]['player_list']):
             avatar = avatars[i]
             rooms[room_id]['player_list'][i]['role'] = avatar
-            print(rooms[room_id]['player_list'][i]['role'])
 
         send_data = {
             'command': 'START GAME',
@@ -351,8 +350,6 @@ class Client(threading.Thread):
                 player['status'] = 'dead'
             if player['status'] == 'dispelled' or player['status'] == 'protected':
                 player['status'] = 'alive'
-
-            print(player['status'])
         
         send_data = {
             'command': 'SUMMARIZED NIGHT',
