@@ -63,15 +63,18 @@ rooms = {
             {'name': 'Monica', 'role': '', 'status': 'alive',
                 'has_voted': False, 'has_acted': False, 'is_ready': True},
         ]
+    },
+    '444': {
+        'num_players': '4',
+        'player_list': []
     }
 }
 players_socket = {
     '123456': [],
     '234567': [],
-    '345678': []
+    '345678': [],
+    '444': []
 }
-
-players_killed = []
 
 class Server:
     def __init__(self):
@@ -162,8 +165,11 @@ class Client(threading.Thread):
                 if data['command'] == "ACTION":
                     self.action(data)
 
-                if data['command'] == "GET ACTION":
-                    self.get_action(data)
+                if data['command'] == "GET NIGHT RESULT":
+                    self.get_night_result(data)
+                
+                if data['command'] == "SUMMARIZE NIGHTT":
+                    self.summarize_night(data)
 
                 if data['command'] == "CHAT":
                     self.chat(data)
@@ -188,7 +194,7 @@ class Client(threading.Thread):
 
     def create_room(self, data, client):
         room_id = data['room_id']
-        rooms[room_id] = {"num_players": None, "player_list": [], "players_killed": []}
+        rooms[room_id] = {"num_players": None, "player_list": []}
         players_socket[room_id] = []
         rooms[room_id]["num_players"] = data['num_players']
         print(
@@ -225,8 +231,6 @@ class Client(threading.Thread):
             players_socket[room_id].append(player_socket)
 
             print(f'>> {data["name"]} JOIN ROOM with id: {room_id}')
-            # print(f'>> server ROOM DETAILS={rooms}')
-            # print(f'>> server SOCKET DETAILS={players_socket}')
 
     def check_room(self, data):
         room_id = data['room_id']
@@ -274,7 +278,8 @@ class Client(threading.Thread):
         num_players = int(rooms[room_id]["num_players"])
         avatars = []
         if num_players == 4:
-            avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
+            # avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
+            avatars = ['Werewolf', 'Dokter', 'Dokter', 'Pemburu']
         elif num_players == 8:
             avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
@@ -300,41 +305,61 @@ class Client(threading.Thread):
     def action(self, data):
         room_id = data["room_id"]
 
-        if data["role"] == "Werewolf" or data["role"] == "Hunter":
-            send_data = {
-                'command': 'None'
-            }
-            self.client.send(pickle.dumps(send_data))
-
-            if data["action_subject"] in rooms[room_id]["players_killed"]:
-                pass
-            else:
-                rooms[room_id]["players_killed"].append(data["action_subject"])
-                for player in rooms[room_id]['player_list']:
-                    if player['name'] == data["action_subject"]:
-                        player['status'] = 'dead'
-                print(f">> {room_id} {data['player_name']}({data['role']}) kill {data['action_subject']}")
+        if data["role"] == "Werewolf" or data["role"] == "Pemburu":
+            for player in rooms[room_id]['player_list']:
+                if player['name'] == data["action_subject"]:
+                    if player['status'] != 'protected':
+                        player['status'] = 'dying'
+                    else:
+                        player['status'] = 'dispelled'
+            print(f">> {room_id} {data['player_name']}({data['role']}) kill {data['action_subject']}")
 
         elif data["role"] == "Peneliti":
             role = None
             for player in rooms[room_id]['player_list']:
                 if player['name'] == data["action_subject"]:
                     role = player['role']
-            send_data = {
-                'command': 'RESPONSE ACTION',
-                'role': role
-            }
-            self.client.send(pickle.dumps(send_data))
+
             print(f">> {room_id} {data['player_name']}({data['role']}) seek for {data['action_subject']}'s role={role}")
 
-    def get_action(self, data):
+        elif data["role"] == "Dokter":
+            for player in rooms[room_id]['player_list']:
+                if player['name'] == data["action_subject"]:
+                    if player['status'] != 'dying':
+                        player['status'] = 'protected'
+                    else:
+                        player['status'] = 'dispelled'
+            print(f">> {room_id} {data['player_name']}({data['role']}) protect {data['action_subject']}")
+        
+
+    def get_night_result(self, data):
         room_id = data["room_id"]
         game_info = rooms[room_id]
+
         send_data = {
-            'command': 'RESPONSE ACTION',
+            'command': 'NIGHT RESULT',
             'game_info': game_info
         }
-        print(f"{room_id} {data['name']}({data['role']}) GET ACTION: {send_data}")
+        print(f">> {room_id} {data['name']} GET NIGHT RESULT: {send_data}")
+        self.client.send(pickle.dumps(send_data))
+
+    def summarize_night(self, data):
+        room_id = data["room_id"]
+
+        for player in rooms[room_id]['player_list']:
+            if player['status'] == 'dying':
+                player['status'] = 'dead'
+            if player['status'] == 'dispelled' or player['status'] == 'protected':
+                player['status'] = 'alive'
+
+            print(player['status'])
+        
+        send_data = {
+            'command': 'SUMMARIZED NIGHT',
+            'game_info': rooms[room_id]
+        }
+        
+        print(f">> {data['name']} SUMMARIZED NIGHT")
         self.client.send(pickle.dumps(send_data))
 
     def chat(self, data):

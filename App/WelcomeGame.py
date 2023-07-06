@@ -12,7 +12,7 @@ class WelcomeGame(tk.Frame):
         self.create_canvas()
         self.create_profile()
         self.create_widgets()
-        self.start_timer(5)
+        self.start_timer(1)
 
 
     def load_image(self):

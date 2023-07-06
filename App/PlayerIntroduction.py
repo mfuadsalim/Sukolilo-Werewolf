@@ -57,7 +57,7 @@ class PlayerIntroduction(tk.Frame):
                 player_names.append(player_name)
                 player_count += 1
         else:
-            for count, player in enumerate(self.menu_manager.player_list):
+            for count, player in enumerate(self.menu_manager.game_info["player_list"]):
                 if player['role'] == 'Werewolf':
                     if self.menu_manager.num_players == '4':
                         if player_count < 1:

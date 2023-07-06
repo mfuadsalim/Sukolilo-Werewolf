@@ -15,14 +15,7 @@ class Night(tk.Frame):
         self.create_canvas()
         self.create_profile()
         self.create_widgets()
-
-        self.night_thread = threading.Thread(target=self.update)
-        self.is_running = True
-        # Set the thread as a daemon to stop it when the main thread exits
-        self.night_thread.daemon = True
-        self.night_thread.start()
-
-        self.start_timer(10)
+        self.start_timer(8)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgMalam.png')
@@ -88,6 +81,8 @@ class Night(tk.Frame):
                 avatar = tk.Label(self.background_canvas, image=self.avatar_peneliti_photo, background='#50477D')
             elif role == "Pemburu" and player['role'] == "Pemburu":
                 avatar = tk.Label(self.background_canvas, image=self.avatar_pemburu_photo, background='#50477D')
+            elif role == "Dokter" and player['role'] == "Dokter":
+                avatar = tk.Label(self.background_canvas, image=self.avatar_dokter_photo, background='#50477D')
             else:
                 avatar = tk.Label(self.background_canvas, image=self.avatar_mahasiswa_photo, background='#50477D')
 
@@ -133,11 +128,6 @@ class Night(tk.Frame):
         self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
         self.role_card = tk.Label(self.background_canvas, image=self.role_card_photo, background='#ECE3D5')
 
-        # text = f"Identitasmu: {name}({role})"
-        # self.name_role_text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5',
-        #                      font=('Arial', 12))
-        # self.name_role_text.place(x=286, y=578)
-
         if role == "Mahasiswa":
             self.text_malam = tk.Label(self.background_canvas, image=self.text_malam_2_photo, background='#ECE3D5')
             self.text_malam.place(x=444, y=183)
@@ -147,15 +137,18 @@ class Night(tk.Frame):
             self.text_malam.place(x=312, y=183)
             self.role_card.place(x=344, y=282)
 
-            self.player = tk.StringVar(self)
+            self.player_subject = tk.StringVar(self)
             players_name = []
             data = self.menu_manager.game_info
             for player in data["player_list"]:
-                if player["status"] == "alive" and player["name"] != self.menu_manager.name and player["role"] != self.menu_manager.role:
+                if player['role'] != 'Dokter':
+                    if player["status"] == "alive" and player["name"] != self.menu_manager.name and player["role"] != self.menu_manager.role:
+                        players_name.append(player["name"])
+                else:
                     players_name.append(player["name"])
 
             self.player_dropdown = ttk.OptionMenu(
-                self, self.player, *players_name)
+                self, self.player_subject, *players_name)
             self.player_dropdown.place(x=740, y=360)
 
             self.do_button = tk.Button(
@@ -170,24 +163,8 @@ class Night(tk.Frame):
                                     font=('Arial', 32))
         self.timer_label.place(x=945, y=550)
 
-    def update(self):
-        role = self.menu_manager.role
-        while self.is_running:
-            try:
-                if role != "Mahasiswa":
-                    data = self.menu_manager.socket.recv(2048)
-                    data = pickle.loads(data)
-                    print(f">> Send data to server: {data}")
-                    if data["command"] == "RESPONSE ACTION":
-                        self.subject_role = data["role"]
-                        self.is_running = False
-                    elif data["command"] == "None":
-                        self.is_running = False
-            except:
-                pass
-
     def action(self):
-        player_name = self.player.get()
+        player_name = self.player_subject.get()
 
         send_data = {
             'command': "ACTION",
@@ -198,28 +175,35 @@ class Night(tk.Frame):
         }
 
         self.menu_manager.socket.send(pickle.dumps(send_data))
-        print(f'>> Send data to server: {send_data}')
+
+        print(f">> Send data to server: {send_data}")
 
         role = self.menu_manager.role
-        if role == "Mahasiswa":
-            pass
-        else:
-            self.role_card.place(x=540, y=282)
-            self.text_malam.destroy()
-            self.do_button.destroy()
-            self.player_dropdown.destroy()
-            if role == "Peneliti":
-                text = f"{self.player.get()} adalah seorang {self.subject_role}"
-                role_card_path = 'assets/RoleCard' + self.subject_role + '.png'
-                self.role_card_image = Image.open(role_card_path)
-                self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
-                self.role_card.configure(image=self.role_card_photo)
-            elif role == "Werewolf" or role == "Hunter":
-                text = f"Anda akan membunuh {self.player.get()}"
+        
+        self.role_card.place(x=540, y=282)
+        self.text_malam.destroy()
+        self.do_button.destroy()
+        self.player_dropdown.destroy()
 
-            text_after_act = tk.Label(self.background_canvas, text=text, background='#ECE3D5',
-                                      font=('Arial', 12))
-            text_after_act.place(x=520, y=230)
+        if role == "Peneliti":
+            for player in self.menu_manager.game_info['player_list']:
+                if player['name'] == self.player_subject.get():
+                    target_role = player['role']
+                    break
+
+            text = f"{self.player_subject.get()} adalah seorang {target_role}"
+            role_card_path = 'assets/RoleCard' + target_role + '.png'
+            self.role_card_image = Image.open(role_card_path)
+            self.role_card_photo = ImageTk.PhotoImage(self.role_card_image)
+            self.role_card.configure(image=self.role_card_photo)
+        elif role == "Werewolf" or role == "Pemburu":
+            text = f"Anda akan membunuh {self.player_subject.get()}"
+        elif role == "Dokter":
+            text = f"{self.player_subject.get()} telah mendapatkan perlindunggan Anda"
+        
+        text_after_act = tk.Label(self.background_canvas, text=text, background='#ECE3D5',
+                                    font=('Arial', 12))
+        text_after_act.place(x=520, y=230)
 
     def start_timer(self, seconds):
         self.remaining_time = seconds
@@ -231,6 +215,29 @@ class Night(tk.Frame):
             self.remaining_time -= 1
             self.after(1000, self.update_timer)
         else:
+            send_data = {
+                'command': "GET NIGHT RESULT",
+                'name': self.menu_manager.name,
+                'room_id': self.menu_manager.room_id,
+            }
+
+            print(f">> Send data to server: {send_data}")
+
+            self.menu_manager.socket.send(pickle.dumps(send_data))
+
+            is_receiving = True
+
+            while is_receiving:
+                data = self.menu_manager.socket.recv(2048)
+                data = pickle.loads(data)
+
+                if data['command'] == "NIGHT RESULT": 
+                    is_receiving = False
+
+            self.menu_manager.game_info = data["game_info"]
+
+            print(data)
+
             self.menu_manager.menus["day"] = Day(
                 self.menu_manager, self.menu_manager)
             self.menu_manager.show_menu("day")
