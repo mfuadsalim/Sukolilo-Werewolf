@@ -15,7 +15,7 @@ class Night(tk.Frame):
         self.create_canvas()
         self.create_profile()
         self.create_widgets()
-        self.start_timer(8)
+        self.start_timer(15)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgMalam.png')
@@ -236,8 +236,6 @@ class Night(tk.Frame):
                     is_receiving = False
 
             self.menu_manager.game_info = data["game_info"]
-
-            print(data)
 
             self.menu_manager.menus["day"] = Day(
                 self.menu_manager, self.menu_manager)

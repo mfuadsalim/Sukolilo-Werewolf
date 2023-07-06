@@ -16,7 +16,7 @@ class Vote(tk.Frame):
         self.create_profile()
         self.create_widgets()
 
-        self.start_timer(8)
+        self.start_timer(15)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgVote.png')

@@ -23,7 +23,7 @@ class Chat(tk.Frame):
         self.chat_thread.daemon = True
         self.chat_thread.start()
 
-        self.start_timer(3)
+        self.start_timer(30)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgChat.png')

@@ -15,8 +15,8 @@ rooms = {
                 'has_voted': False, 'has_acted': False, 'is_ready': True},
             {'name': 'Fuad', 'role': '', 'status': 'alive',
                 'has_voted': False, 'has_acted': False, 'is_ready': True},
-            # {'name': 'Monica', 'role': '', 'status': 'alive',
-            #     'has_voted': False, 'has_acted': False, 'is_ready': True},
+            {'name': 'Monica', 'role': '', 'status': 'alive',
+                'has_voted': False, 'has_acted': False, 'is_ready': True},
         ]
     },
     '234567': {
@@ -294,7 +294,7 @@ class Client(threading.Thread):
         avatars = []
         if num_players == 4:
             # avatars = ['Werewolf', 'Peneliti', 'Mahasiswa', 'Mahasiswa']
-            avatars = ['Werewolf', 'Dokter', 'Pemburu', 'Pemburu']
+            avatars = ['Werewolf', 'Pemburu', 'Pemburu', 'Pemburu']
         elif num_players == 8:
             avatars = ['Werewolf', 'Werewolf', 'Peneliti', 'Pemburu',
                        'Mahasiswa', 'Mahasiswa', 'Mahasiswa', 'Mahasiswa']
@@ -376,6 +376,8 @@ class Client(threading.Thread):
 
     def chat(self, data):
         room_id = data["room_id"]
+        players_voted[room_id] = []
+
         message = f"{data['name']}\t: {data['message']}"
         send_data = {
             'command': "RESPONSE CHAT",
@@ -390,7 +392,6 @@ class Client(threading.Thread):
         players_voted[room_id].append(data["player_voted"])
 
         print(f">> {room_id} {data['name']}({data['role']}) Voted for: {data['player_voted']}")
-        print(players_voted)
 
     def vote_result(self, data):
         room_id = data["room_id"]
@@ -398,23 +399,30 @@ class Client(threading.Thread):
 
         vote_counts = Counter(players_voted[room_id])
         most_common = vote_counts.most_common(2)
-        if len(most_common) == 1 or most_common[0][1] > most_common[1][1]:
-            for player in player_list:
-                if (player["name"] == most_common[0][0]):
-                    player["status"] = 'voted'
 
-            vote_result = f"{most_common[0][0]} telah dikeluarkan berdasarkan voting terbanyak"
+        if len(most_common) == 1 or (len(most_common) > 1 and most_common[0][1] > most_common[1][1]):
+            for player in player_list:
+                if player["name"] == most_common[0][0]:
+                    player["status"] = 'dead'
+
+            vote_result = most_common[0][0]
+            voted_role = next((player["role"] for player in player_list if player["name"] == vote_result), None)
         else:
-            vote_result = "Tidak ada pemain yang dikeluarkan"
+            vote_result = None
+            voted_role = None
 
         send_data = {
             'command' : "RESPONSE VOTE RESULT",
             'game_info' : rooms[room_id],
-            'vote_result' : vote_result
+            'vote_result' : vote_result,
+            'voted_role': voted_role
         }
 
+        print(f">> {room_id} {data['name']} Get vote result: {send_data['vote_result']}")
+
         self.client.send(pickle.dumps(send_data))
-        print(f">> {room_id} {data['name']}({data['role']}) Get vote result: {send_data['vote_result']}")
+
+
 
     def broadcast(self, send_data, room_id):
         for player in players_socket[room_id]:

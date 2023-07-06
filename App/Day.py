@@ -5,6 +5,7 @@ import threading
 import time
 
 from App.Chat import Chat
+from App.EndGame import EndGame
 
 class Day(tk.Frame):
     def __init__(self, master, menu_manager):
@@ -15,7 +16,7 @@ class Day(tk.Frame):
         self.create_profile()
         self.create_widgets()
         self.show_summary()
-        self.start_timer(2)
+        self.start_timer(8)
 
     def load_image(self):
         self.background_image = Image.open('assets/BgSiang.png')
@@ -115,7 +116,6 @@ class Day(tk.Frame):
 
         self.text = tk.Label(self.background_canvas, text=text, foreground="#37342f", background='#ECE3D5', font=('Arial', 12))
         self.text.place(x=400, y=350)
-        self.is_running = False
 
     def start_timer(self, seconds):
         self.remaining_time = seconds
@@ -138,7 +138,6 @@ class Day(tk.Frame):
             print(f">> Send data to server: {send_data}")
 
             is_receiving = True
-
             while is_receiving:
                 data = self.menu_manager.socket.recv(2048)
                 data = pickle.loads(data)
@@ -148,14 +147,31 @@ class Day(tk.Frame):
 
             self.menu_manager.game_info = data["game_info"]
 
+            warga = 0
+            werewolf = 0
+
             for player in data["game_info"]["player_list"]:
+                # set menu_manager status
                 if player['name'] == self.menu_manager.name:
                     if player['status'] == 'dead':
                         self.menu_manager.status = 'dead'
                     elif player['status'] == 'alive':
                         self.menu_manager.status = 'alive'
+                
+                # check for end game condition
+                if player['status'] == 'alive':
+                    if player['role'] == 'Werewolf':
+                        werewolf += 1
+                    else: warga += 1
+            
+            if warga == 0 or werewolf == 0:
+                if warga == 0: winner = 'warga'
+                else: winner = 'werewolf'
 
-            self.is_running = False
-            self.menu_manager.menus["chat"] = Chat(
-                self.menu_manager, self.menu_manager)
-            self.menu_manager.show_menu("chat")
+                self.menu_manager.menus["end_game"] = EndGame(
+                    self.menu_manager, self.menu_manager, winner)
+                self.menu_manager.show_menu("end_game")
+            else:
+                self.menu_manager.menus["chat"] = Chat(
+                    self.menu_manager, self.menu_manager)
+                self.menu_manager.show_menu("chat")

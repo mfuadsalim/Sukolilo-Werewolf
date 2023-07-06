@@ -5,39 +5,38 @@ import pickle
 import threading
 import time
 
-class VoteResult(tk.Frame):
-    def __init__(self, master, menu_manager):
+class EndGame(tk.Frame):
+    def __init__(self, master, menu_manager, winner):
         super().__init__(master)
         self.menu_manager = menu_manager
+        self.winner = winner
         self.load_image()
         self.create_canvas()
-        self.get_vote_result()
         self.create_profile()
         self.create_widgets()
 
-        self.start_timer(3)
-
-    def get_vote_result(self):
-        send_data = {
-            'command': "VOTE RESULT",
-            'room_id': self.menu_manager.room_id,
-            'name': self.menu_manager.name,
-        }
-
-        self.menu_manager.socket.send(pickle.dumps(send_data))
-        self.menu_manager.socket.send(pickle.dumps(send_data))
-        print(f">> Send data to server: {send_data}")
-
-        data = self.menu_manager.socket.recv(2048)
-        data = pickle.loads(data)
-        
-        self.menu_manager.game_info = data["game_info"]
-        self.vote_result = data['vote_result']
-        self.voted_role = data['voted_role']
-
     def load_image(self):
-        self.background_image = Image.open('assets/BgVoteResult.png')
+        self.background_image = Image.open('assets/BgGameSelesai.png')
+        self.warga_menang_image = Image.open('assets/TimWargaMenang.png')
+        self.warga_kalah_image = Image.open('assets/TimWargaKalah.png')
+        self.werewolf_menang_image = Image.open('assets/TimWerewolfMenang.png')
+        self.werewolf_kalah_image = Image.open('assets/TimWerewolfKalah.png')
+
+
         self.background_photo = ImageTk.PhotoImage(self.background_image)
+        self.warga_menang_photo = ImageTk.PhotoImage(self.warga_menang_image)
+        self.warga_kalah_photo = ImageTk.PhotoImage(self.warga_kalah_image)
+        self.werewolf_menang_photo = ImageTk.PhotoImage(self.werewolf_menang_image)
+        self.werewolf_kalah_photo = ImageTk.PhotoImage(self.werewolf_kalah_image)
+
+        self.back_btn_image = Image.open(
+            'assets/button/Small Button Kembali.png')
+        self.hover_back_btn_image = Image.open(
+            'assets/button/Small Button Kembali Hover.png')
+
+        self.back_btn_photo = ImageTk.PhotoImage(self.back_btn_image)
+        self.hover_back_btn_photo = ImageTk.PhotoImage(
+            self.hover_back_btn_image)
 
     def create_canvas(self):
         self.background_canvas = tk.Canvas(
@@ -106,64 +105,29 @@ class VoteResult(tk.Frame):
             player_names.append(player_name)
 
     def create_widgets(self):
-        if (self.vote_result):
-            text = f"Berdasarkan voting terbanyak, {self.vote_result} akan menjalani hukuman mati\nIdentitas asli {self.vote_result} adalah {self.voted_role}"
-        else:
-            text = f"Berdasarkan hasil voting, terdapat skor seri sehingga\ntidak ada yang menjalani hukuman mati"
-
-        self.text_after_vote = tk.Label(self.background_canvas, text=text, background='#ECE3D5',
-                                   font=('Arial', 12))
-        self.text_after_vote.place(x=400, y=360)
-
-        self.timer_label = tk.Label(self.background_canvas, text='', foreground='#ECE3D5', background="#612C12",
-                                    font=('Arial', 32))
-        self.timer_label.place(x=950, y=590)
-
-    def start_timer(self, seconds):
-        self.remaining_time = seconds
-        self.update_timer()
-
-    def update_timer(self):
-        from App.Night import Night
-        from App.EndGame import EndGame
-
-        if self.remaining_time > 0:
-            self.timer_label.configure(text=self.remaining_time)
-            self.remaining_time -= 1
-            self.after(1000, self.update_timer)
-        else:
-            data = self.menu_manager.game_info
-
-            warga = 0
-            werewolf = 0
-
-            for player in data["player_list"]:
-                # set menu_manager status
-                if player['name'] == self.menu_manager.name:
-                    if player['status'] == 'dead':
-                        self.menu_manager.status = 'dead'
-                    elif player['status'] == 'alive':
-                        self.menu_manager.status = 'alive'
-                
-                # check for end game condition
-                if player['status'] == 'alive':
-                    if player['role'] == 'Werewolf':
-                        werewolf += 1
-                    else: warga += 1
-
-            print(warga)
-            print(werewolf)
-            
-            if warga == 0 or werewolf == 0:
-                if warga == 0: winner = 'warga'
-                else: winner = 'werewolf'
-
-                self.menu_manager.menus["end_game"] = EndGame(
-                    self.menu_manager, self.menu_manager, winner)
-                self.menu_manager.show_menu("end_game")
-            
+        if (self.winner == 'warga'):
+            text = f"Karena sudah tidak ada lagi warga yang\ntersisa di Sukolilo, game sudah berakhir"
+            if (self.menu_manager.team == 'Warga'):
+                self.sign = tk.Label(self.background_canvas, image=self.warga_kalah_photo, background='#ECE3D5')
             else:
-                self.menu_manager.menus["night"] = Night(
-                    self.menu_manager, self.menu_manager)
-                self.menu_manager.show_menu("night")
+                self.sign = tk.Label(self.background_canvas, image=self.werewolf_menang_photo, background='#ECE3D5')
+        else:
+            text = f"Karena sudah tidak ada lagi Werewolf yang\ntersisa di Sukolilo, game sudah berakhir"
+            if (self.menu_manager.team == 'Warga'):
+                self.sign = tk.Label(self.background_canvas, image=self.warga_menang_photo, background='#ECE3D5')
+            else:
+                self.sign = tk.Label(self.background_canvas, image=self.werewolf_kalah_photo, background='#ECE3D5')
+
+        self.conclusion_text = tk.Label(self.background_canvas, text=text, background='#ECE3D5',
+                                   font=('Arial', 12))
+        self.conclusion_text.place(x=480, y=220)
+        self.sign.place(x=473, y=292)
+
+        back_button = tk.Button(
+            self.background_canvas, image=self.back_btn_photo, command=self.menu_manager.show_play_menu, borderwidth=0)
+        back_button.place(x=565, y=565)
+        back_button.bind('<Enter>', lambda event: back_button.config(
+            image=self.hover_back_btn_photo))
+        back_button.bind('<Leave>', lambda event: back_button.config(
+            image=self.back_btn_photo))
 
