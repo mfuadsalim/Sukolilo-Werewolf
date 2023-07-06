@@ -5,6 +5,8 @@ import pickle
 import threading
 import time
 
+from App.VoteResult import VoteResult
+
 class Vote(tk.Frame):
     def __init__(self, master, menu_manager):
         super().__init__(master)
@@ -133,7 +135,26 @@ class Vote(tk.Frame):
         self.timer_label.place(x=950, y=590)
 
     def vote(self):
-        pass
+        player_voted = self.player.get()
+
+        send_data = {
+            'command': "VOTE",
+            'room_id': self.menu_manager.room_id,
+            'role': self.menu_manager.role,
+            'name': self.menu_manager.name,
+            'player_voted': player_voted,
+        }
+
+        self.menu_manager.socket.send(pickle.dumps(send_data))
+        print(f">> Send data to server: {send_data}")
+
+        self.player_dropdown.destroy()
+        self.vote_button.destroy()
+
+        text = f"Anda telah melakukan vote kepada: {player_voted}"
+        text_after_vote = tk.Label(self.background_canvas, text=text, background='#ECE3D5',
+                                  font=('Arial', 12))
+        text_after_vote.place(x=470, y=360)
 
     def start_timer(self, seconds):
         self.remaining_time = seconds
@@ -145,5 +166,7 @@ class Vote(tk.Frame):
             self.remaining_time -= 1
             self.after(1000, self.update_timer)
         else:
-            pass
+            self.menu_manager.menus["vote_result"] = VoteResult(
+                self.menu_manager, self.menu_manager)
+            self.menu_manager.show_menu("vote_result")
 
